@@ -28,6 +28,13 @@ function chrisvf_grid( $atts = [], $content = null) {
 }
 add_shortcode('chrisvf_grid', 'chrisvf_grid');
 
+add_action( 'wp_enqueue_scripts', 'prefix_add_my_stylesheet' );
+function prefix_add_my_stylesheet() {
+    // Respects SSL, Style.css is relative to the current file
+    wp_register_style( 'prefix-style', plugins_url('grid.css', __FILE__) );
+    wp_enqueue_style( 'prefix-style' );
+}
+
 /* FRINGE FUNCTIONS */
 
 /* LOAD ICAL */
@@ -120,7 +127,6 @@ function chrisvf_event_times($event, $min_t=null, $max_t=null) {
 
 function chrisvf_render_grid() {
   $h = array();
-  $h []= chrisvf_grid_css();
 
   for( $dow=8;$dow<=13;++$dow ) {
     $date = sprintf('2017-08-%02d', $dow );
@@ -128,8 +134,8 @@ function chrisvf_render_grid() {
     if( date( "Y-m-d", time() ) == date( "Y-m-d", $time_t ) ) {
       $h[]="<a name='today'></a>";
     }
-    $h[]="<h2 style='margin-bottom:0'>".date( "l j F", $time_t )."</h2>";
-    $h[]="<div style='margin-bottom:1em'>&lt;&lt; <a style='font-family:sans-serif; color: black' href='/vfringe/'>back to main site</a></div>";
+    $h[]="<h2 class='vf_grid_day_heading' style='margin-bottom:0'>".date( "l j F", $time_t )."</h2>";
+    #$h[]="<div style='margin-bottom:1em'>&lt;&lt; <a style='font-family:sans-serif; color: black' href='/vfringe/'>back to main site</a></div>";
     $h[]=chrisvf_serve_grid_day( $date );
   }
   $h []= "
@@ -144,19 +150,6 @@ jQuery(document).ready(function() {
   return join( "", $h );
 }
 
-function chrisvf_serve_grid() {
-  return array( "#markup"=> chrisvf_render_grid() );
-}
-
-function chrisvf_serve_grid_raw() {
-  $path = drupal_get_path('module', 'chrisvf_extras');
-  print '<link rel="stylesheet" href="/'.$path.'/grid.css" />';
-  print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-  print '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> ';
-  print '<link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />';
-
-  print chrisvf_render_grid();
-}
 
 function chrisvf_cmp_venue($a,$b) {
   global $vf_venues;
@@ -407,8 +400,13 @@ $h[]= $a;
             $h[]= "<div style='font-style:italic;font-size:80%'>In your itinerary</div>";
             $h[]= "<div style='margin:5px;font-size:200%;color:#000'>★</div>";
           }
-          $h[]= $cell['event']["SUMMARY"];
-          $h[]= "..".$cell['event']['CATEGORIES'];
+          $h[]= "<div class='vf_grid_cell_title'>". $cell['event']["SUMMARY"]."</div>";
+          if( !empty( trim( $cell['event']['CATEGORIES'] ) ) ) { 
+            foreach( preg_split( "/,/", $cell['event']['CATEGORIES'] ) as $cat ) {
+              $h[]= "<div class='vf_grid_cat'>".$cat."</div>";
+            }
+          }
+
 #$h[]=print_r( $cell,1 );
           if( $clash ) { 
             $h[]= "<div style='font-style:italic;font-size:80%;margin-top:1em'>Clashes with your itinerary</div>";
@@ -852,108 +850,3 @@ var bounds = L.latLngBounds([]);
 
 // eat a sea horse
 
-function chrisvf_grid_css() {
-  return '
-<style>
-
-.vf_grid_outer {
-  max-width: 100%;
-  overflow: scroll;
-}
-table.vf_grid th {
-  background-color: #eee;
-  color: #444;
-  border: solid 2px #333;
-  padding: 0.2em 0.5em 1em 0.5em;
-  vertical-align: top;
-}
-h2 {
-  margin-top: 1em;
-  font-family: Helvetica,"MontserratRegular";
-}
-/*
-body { background-color: #000; }
-*/
-
-table.vf_grid {
-  /*background: url(grass.png) ;*/
-  color: #444;
-  font-family: Helvetica,"MontserratRegular";
-  font-size:80%;
-  border-collapse: collapse;
-  border-right: solid 2px black;
-  border-bottom: solid 2px black;
-  page-break-after: always;
-}
-th.vf_grid_venue {
-  vertical-align: bottom;
-  padding-top: 1em;
-}
-.vf_grid_event {
-  border: solid 2px #333;
-  background-color: #eea;
-  vertical-align: top;
-  text-align: center;
-}
-.vf_grid_now {
-  background-color: yellow;
-}
-.vf_grid_inner {
-  padding: 0.5em;
-}
-.vf_grid_col_vlast { 
-  /*border-right: dashed 2px #000;*/
-}
-.vf_grid_freecell { 
-  background-color: #eee;
-}
-.vf_grid_row_hour_even .vf_grid_freecell { 
-  background-color: rgba(0,0,0,0.1) !important;
-}
-.vf_grid_event_noend {
-  background: url(saw.png) #ffe repeat-x bottom;
-  padding-bottom: 20px !important;
-} 
-
-.vf_grid_venue_VentnorBotanicGarden.vf_grid_event,
-.vf_grid_venue_Parkside.vf_grid_event {
-  background-color: #cfc ;
-  color: #040;
-}
-.vf_grid_freecell {
-  /*border-bottom: 1px dashed #cfc;*/
-  background: transparent;
-}
-.vf_grid_venue_ObservatoryBar.vf_grid_event {
-  background-color: #ccf ;
-  color: #004;
-}
-/*
-.vf_grid_venue_ObservatoryBar.vf_grid_freecell {
-  background: url(clouds.png) fixed;
-}
-*/
-.vf_grid_busy {
-  background-color: rgba(0,0,0,0.7) !important;
-}
-.vf_grid_row_hour_even .vf_grid_freecell.vf_grid_busy {
-  background-color: rgba(0,0,0,0.6) !important;
-}
-.vf_grid_itinerary {
-  background-color: #fff !important;
-  font-size: 150%;
-}
-
-.vf_grid_clash {
-  background-color: #333 !important;
-  color: #ccc !important;
-  border-color: #000 !important;
-}
-
-.vf_grid_nonitinerary {
-  background-color:  #D2B48C !important;
-  color: #333 !important;
-}
-</style>
-';
-}

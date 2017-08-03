@@ -1,0 +1,113 @@
+.vf_grid_outer {
+  max-width: 100%;
+  overflow: scroll;
+}
+table.vf_grid th {
+  background-color: #eee;
+  color: #444;
+  border: solid 2px #333;
+  padding: 0.2em 0.5em 1em 0.5em;
+  vertical-align: top;
+}
+h2 {
+  margin-top: 1em;
+  font-family: Helvetica,"MontserratRegular";
+}
+/*
+body { background-color: #000; }
+*/
+
+table.vf_grid {
+  /*background: url(grass.png) ;*/
+  color: #444;
+  font-family: Helvetica,"MontserratRegular";
+  font-size:80%;
+  border-collapse: collapse;
+  border-right: solid 2px black;
+  border-bottom: solid 2px black;
+  page-break-after: always;
+}
+th.vf_grid_venue {
+  vertical-align: bottom;
+  padding-top: 1em;
+}
+.vf_grid_event {
+  border: solid 2px #333;
+  background-color: #eea;
+  vertical-align: top;
+  text-align: center;
+}
+.vf_grid_now {
+  background-color: yellow;
+}
+.vf_grid_inner {
+  padding: 0.5em;
+}
+.vf_grid_col_vlast { 
+  /*border-right: dashed 2px #000;*/
+}
+.vf_grid_freecell { 
+  background-color: #eee;
+}
+.vf_grid_row_hour_even .vf_grid_freecell { 
+  background-color: rgba(0,0,0,0.1) !important;
+}
+.vf_grid_row_hour_even .vf_grid_col_even.vf_grid_freecell { 
+  background-color: rgba(0,0,0,0.14) !important;
+}
+.vf_grid_row_hour_odd .vf_grid_col_even.vf_grid_freecell { 
+  background-color: rgba(0,0,0,0.04) !important;
+}
+.vf_grid_event_noend {
+  background: url(saw.png) #ffe repeat-x bottom;
+  padding-bottom: 20px !important;
+} 
+
+.vf_grid_venue_VentnorBotanicGarden.vf_grid_event,
+.vf_grid_venue_Parkside.vf_grid_event {
+  background-color: #cfc ;
+  color: #040;
+}
+.vf_grid_freecell {
+  /*border-bottom: 1px dashed #cfc;*/
+  background: transparent;
+}
+.vf_grid_venue_ObservatoryBar.vf_grid_event {
+  background-color: #ccf ;
+  color: #004;
+}
+/*
+.vf_grid_venue_ObservatoryBar.vf_grid_freecell {
+  background: url(clouds.png) fixed;
+}
+*/
+.vf_grid_busy {
+  background-color: rgba(0,0,0,0.7) !important;
+}
+.vf_grid_row_hour_even .vf_grid_freecell.vf_grid_busy {
+  background-color: rgba(0,0,0,0.6) !important;
+}
+.vf_grid_itinerary {
+  background-color: #fff !important;
+  font-size: 150%;
+}
+
+.vf_grid_clash {
+  background-color: #333 !important;
+  color: #ccc !important;
+  border-color: #000 !important;
+}
+
+.vf_grid_nonitinerary {
+  background-color:  #D2B48C !important;
+  color: #333 !important;
+}
+.vf_grid_cell_title {
+}
+.vf_grid_cat {
+  border: solid 1px #000;
+  padding: 2px 2px 0px 2px;
+  font-size: 80%;
+  margin: 6px;
+  display: inline-block;
+}
