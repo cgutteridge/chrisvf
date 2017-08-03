@@ -1,0 +1,66 @@
+.vf_itinerary_table td {
+  padding: 4px;
+  border: solid 1px black;
+}
+  
+.vf_itinerary_toggle { 
+  margin-left: 1em;
+  margin-right: 1em;
+  margin-bottom: 0.25em;
+  display: inline-block;
+  font-size: 80%;
+}
+.vf_itinerary_button { 
+  text-decoration: none;
+  border-width: 2px;
+  border-style: solid;
+  color: #444 !important;
+  border-color: #444;
+  background-color: white;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 3px 9px;
+  margin-left: 4px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.vf_itinerary_button:hover { 
+  background-color: #ccc;
+}
+.vf_itinerary_remove_button:hover {
+  background-color: #fcc;
+}
+.vf_itinerary_add_button:hover {
+  background-color: #cfc;
+}
+.vf_itinerary_count {
+  margin-right: 1em;
+  display: inline-block;
+}
+.vf_itinerary_bar {
+  display: inline-block;
+  float:right;
+}
+.vf_itinerary_display {
+  display: inline-block;
+}
+.vf_itinerary_bar .vf_itinerary_button{
+/*
+ background-color: #7070a0;
+  color: #fff !important;
+  border-color: #fff;
+*/
+}
+.vf_itinerary_bar .vf_itinerary_button:hover{
+  background-color: #fff ;
+  color: #7070a0 !important;
+}
+@media only screen and (max-width: 800px) {
+  .vf_fred { text-align: center; }
+  .vf_itinerary_bar  { display: block; float: none !important }
+}
+.nownext_slide {
+  background-color: #fff;
+}
