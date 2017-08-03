@@ -28,11 +28,17 @@ function chrisvf_grid( $atts = [], $content = null) {
 }
 add_shortcode('chrisvf_grid', 'chrisvf_grid');
 
-add_action( 'wp_enqueue_scripts', 'prefix_add_my_stylesheet' );
-function prefix_add_my_stylesheet() {
+add_action( 'wp_enqueue_scripts', 'chrisvf_add_my_stylesheet' );
+function chrisvf_add_my_stylesheet() {
     // Respects SSL, Style.css is relative to the current file
-    wp_register_style( 'prefix-style', plugins_url('grid.css', __FILE__) );
-    wp_enqueue_style( 'prefix-style' );
+    wp_register_style( 'chrisvf-grid', plugins_url('grid.css', __FILE__) );
+    wp_enqueue_style( 'chrisvf-grid' );
+
+    wp_register_style( 'chrisvf-itinerary', plugins_url('itinerary.css', __FILE__) );
+    wp_enqueue_style( 'chrisvf-itinerary' );
+
+    wp_register_script( 'chrisvf-itinerary', plugins_url('itinerary.js', __FILE__) );
+    wp_enqueue_script( 'chrisvf-itinerary' );
 }
 
 /* FRINGE FUNCTIONS */
