@@ -54,7 +54,7 @@ function chrisvf_get_info() {
     
   #$ical_url = "http://vfringe.ventnorexchange.co.uk/whatson/?ical=1";
   $cache_file = "/tmp/vfringe-events.json";
-  $cache_timeout = 30;
+  $cache_timeout = 60*30; # 30 minute cache
 
   if (file_exists($cache_file) && (filemtime($cache_file) > (time() - $cache_timeout))) {
     print "\n<!-- ...USE CACHE FILE -->\n";
