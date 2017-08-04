@@ -46,13 +46,152 @@ function chrisvf_add_my_stylesheet() {
 /* LOAD ICAL */
 
 function chrisvf_get_events() {
-  $ical_file = "http://vfringe.ventnorexchange.co.uk/whatson/?ical=1";
+  $info = chrisvf_get_info();
+  return $info['events'];
+}
+
+function chrisvf_get_info() {
+  global $chrisvf_cache;
+  print "\n<!-- GET CACHE -->\n";
+  if( !empty( $chrisvf_cache )) {
+    print "\n<!-- ...RAM CACHE -->\n";
+    return $chrisvf_cache;
+  }
+    
+  $ical_url = "http://vfringe.ventnorexchange.co.uk/whatson/?ical=1";
+  $cache_file = "/tmp/vfringe-events.json";
+  $cache_timeout = 30;
+
+  if (file_exists($cache_file) && (filemtime($cache_file) > (time() - $cache_timeout))) {
+    print "\n<!-- ...USE CACHE FILE -->\n";
+    $chrisvf_events = json_decode( file_get_contents( $cache_file ),true);
+  } else {
+    print "\n<!-- ...BUILD CACHE FILE -->\n";
+    $chrisvf_cache = array();
+    $chrisvf_cache["events"]  = chrisvf_wp_events();
+     
+    $ob_events = chrisvf_load_ical( "https://calendar.google.com/calendar/ical/co2vini9rdvmlv46ur167tufm4%40group.calendar.google.com/public/basic.ics" );
+    foreach( $ob_events as $event ) {
+      $event["LOCATION"] = "The Observatory";
+      $chrisvf_cache["events"][] = $event;
+    }
+
+    $ob_events = chrisvf_load_ical( "https://calendar.google.com/calendar/ical/l1irfmsvtvgr2phlprdodo2j48%40group.calendar.google.com/public/basic.ics" );
+    foreach( $ob_events as $event ) {
+      $event["LOCATION"] = "Parkside";
+      $chrisvf_cache["events"][] = $event;
+    }
+
+    file_put_contents($cache_file, json_encode($chrisvf), LOCK_EX);
+  }
+
+  return $chrisvf_cache;
+} 
+
+function chrisvf_wp_events() {
+	global $wp_query;
+
+	$tec         = Tribe__Events__Main::instance();
+	$args = array(
+		'eventDisplay' => 'custom',
+		'posts_per_page' => -1,
+//		'hide_upcoming' => true,
+	);
+
+	// Verify the Intial Category
+	if ( $wp_query->get( Tribe__Events__Main::TAXONOMY, false ) !== false ) {
+		$args[ Tribe__Events__Main::TAXONOMY ] = $wp_query->get( Tribe__Events__Main::TAXONOMY );
+	}
+
+	$events = tribe_get_events( $args );
+	$ical = array();
+	foreach( $events as $event_post ) {
+		$full_format = 'Ymd\THis';
+		$utc_format = 'Ymd\THis\Z';
+		$time = (object) array(
+			'start' => tribe_get_start_date( $event_post->ID, false, 'U' ),
+			'end' => tribe_get_end_date( $event_post->ID, false, 'U' ),
+		);
+	
+		if ( 'yes' == get_post_meta( $event_post->ID, '_EventAllDay', true ) ) {
+			$type = 'DATE';
+			$format = 'Ymd';
+		} else {
+			$type = 'DATE-TIME';
+			$format = $full_format;
+		}
+	
+		$tzoned = (object) array(
+			'start'    => date( $format, $time->start ),
+			'end'      => date( $format, $time->end ),
+		);
+	
+		if ( 'DATE' === $type ){
+			$item[ "DTSTART"] = $tzoned->start;
+			$item[ "DTEND"] = $tzoned->end;
+		} else {
+			// Are we using the sitewide timezone or the local event timezone?
+			$tz = Tribe__Events__Timezones::EVENT_TIMEZONE === Tribe__Events__Timezones::mode()
+				? Tribe__Events__Timezones::get_event_timezone_string( $event_post->ID )
+				: Tribe__Events__Timezones::wp_timezone_string();
+	
+			$item[ 'DTSTART'] = $tzoned->start;
+			$item[ 'DTEND' ] = $tzoned->end;
+		}
+	
+		$item[ 'UID' ]= $event_post->ID . '-' . $time->start . '-' . $time->end . '@' . parse_url( home_url( '/' ), PHP_URL_HOST );
+		$item[ 'SUMMARY' ]= str_replace( array( ',', "\n", "\r" ), array( '\,', '\n', '' ), html_entity_decode( strip_tags( $event_post->post_title ), ENT_QUOTES ) );
+		$item[ 'DESCRIPTION' ]= str_replace( array( ',', "\n", "\r" ), array( '\,', '\n', '' ), html_entity_decode( strip_tags( str_replace( '</p>', '</p> ', apply_filters( 'the_content', $event_post->post_content ) ) ), ENT_QUOTES ) );
+		$item[ 'URL' ]= get_permalink( $event_post->ID );
+
+		// add location if available
+		$location = $tec->fullAddressString( $event_post->ID );
+		if ( ! empty( $location ) ) {
+			$str_location = str_replace( array( ',', "\n" ), array( '\,', '\n' ), html_entity_decode( $location, ENT_QUOTES ) );
+	
+			$item[ 'LOCATION' ]=  $str_location;
+		}
+	
+		if ( class_exists( 'Tribe__Events__Pro__Geo_Loc' ) ) {
+			$long = Tribe__Events__Pro__Geo_Loc::instance()->get_lng_for_event( $event_post->ID );
+			$lat  = Tribe__Events__Pro__Geo_Loc::instance()->get_lat_for_event( $event_post->ID );
+			if ( ! empty( $long ) && ! empty( $lat ) ) {
+				$item["GEO"] = sprintf( '%s;%s', $lat, $long );
+			}
+		}
+
+		// add categories if available
+		$event_cats = (array) wp_get_object_terms( $event_post->ID, Tribe__Events__Main::TAXONOMY, array( 'fields' => 'names' ) );
+		if ( ! empty( $event_cats ) ) {
+			$item['CATEGORIES'] = html_entity_decode( join( ',', $event_cats ), ENT_QUOTES );
+		}
+
+		$ical []= $item;
+
+	}
+
+	return $ical;
+}
+
+
+#TODO BETTERER
+function chrisvf_munge_ical_event( $event ) {
+      if( $event["UID"] == "1545-1502272800-1502539200@vfringe.ventnorexchange.co.uk" ) { continue; } # 3 days 
+      if( $event["UID"] == "1716-1502064000-1502668799@vfringe.ventnorexchange.co.uk" ) { continue; } # before you start
+      if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor"; }
+      $event["LOCATION"] = preg_replace( "/,\s*United Kingdom/","",$event["LOCATION"] );
+      $event["LOCATION"] = preg_replace( "/,\s*Ventnor/","",$event["LOCATION"] );
+      $event["LOCATION"] = preg_replace( "/,\s*Isle of Wight/","",$event["LOCATION"] );
+      $event["LOCATION"] = preg_replace( "/,\s*PO38 ?.../","",$event["LOCATION"] );
+      $event["LOCATION"] = preg_replace( "/\s*PO38 ?.../","",$event["LOCATION"] );
+      return $event;
+}
+
+function chrisvf_load_ical($ical_file) {
   $lines = file( $ical_file );
   $events = array();
   $in_event = false;
   foreach( $lines as $line ) {
-#<br>*END:VEVENT
-#<br>*BEGIN:VEVENT
 
     $line = chop( $line );
     if ( preg_match( '/BEGIN:VEVENT/', $line ) ) {
@@ -63,16 +202,8 @@ function chrisvf_get_events() {
     $line = chop( $line );
     if ( preg_match( '/END:VEVENT/', $line ) ) {
       $in_event = false;
-#TODO BETTERER
-      if( $event["UID"] == "1545-1502272800-1502539200@vfringe.ventnorexchange.co.uk" ) { continue; } # 3 days 
-      if( $event["UID"] == "1716-1502064000-1502668799@vfringe.ventnorexchange.co.uk" ) { continue; } # before you start
-      if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor"; }
-      $event["LOCATION"] = preg_replace( "/,\s*United Kingdom/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*Ventnor/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*Isle of Wight/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*PO38 ?.../","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/\s*PO38 ?.../","",$event["LOCATION"] );
-      $events []= $event;
+      
+      $events []= chrisvf_munge_ical_event( $event );
       continue;
     }
     if( !$in_event ) {
@@ -413,7 +544,6 @@ $h[]= $a;
             }
           }
 
-#$h[]=print_r( $cell,1 );
           if( $clash ) { 
             $h[]= "<div style='font-style:italic;font-size:80%;margin-top:1em'>Clashes with your itinerary</div>";
           }
