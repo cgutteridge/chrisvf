@@ -47,8 +47,8 @@ function chrisvf_get_events() {
 function chrisvf_get_info() {
   global $chrisvf_cache;
   print "\n<!-- GET CACHE -->\n";
-  if( !empty( $chrisvf_cache ) && !empty( $chrisvf_cache['events'])) {
-    print "\n<!-- ...RAM CACHE -->\n";
+  if( !@$_GET['redo'] && !empty( $chrisvf_cache ) && !empty( $chrisvf_cache['events'])) {
+#    print "\n<!-- ...RAM CACHE -->\n";
     return $chrisvf_cache;
   }
     
@@ -56,11 +56,11 @@ function chrisvf_get_info() {
   $cache_file = "/tmp/vfringe-events.json";
   $cache_timeout = 60*30; # 30 minute cache
 
-  if (file_exists($cache_file) && (filemtime($cache_file) > (time() - $cache_timeout))) {
-    print "\n<!-- ...USE CACHE FILE -->\n";
+  if ( @$_GET['redo'] || (file_exists($cache_file) && (filemtime($cache_file) > (time() - $cache_timeout)))) {
+#    print "\n<!-- ...USE CACHE FILE -->\n";
     $chrisvf_cache = json_decode( file_get_contents( $cache_file ),true);
   } else {
-    print "\n<!-- ...BUILD CACHE FILE -->\n";
+#    print "\n<!-- ...BUILD CACHE FILE -->\n";
     $chrisvf_cache["events"]  = chrisvf_wp_events();
      
     $ob_events = @chrisvf_load_ical( "https://calendar.google.com/calendar/ical/co2vini9rdvmlv46ur167tufm4%40group.calendar.google.com/public/basic.ics" );
@@ -70,6 +70,7 @@ function chrisvf_get_info() {
     foreach( $chrisvf_cache["ob_events"] as $event ) {
       $event["LOCATION"] = "The Observatory / Plaza";
       $event["LOCID"] = 8;
+      if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
     }
 
@@ -80,6 +81,7 @@ function chrisvf_get_info() {
     foreach( $chrisvf_cache["ps_events"] as $event ) {
       $event["LOCATION"] = "Parkside";
       $event["LOCID"] = 3;
+      if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
     }
 
