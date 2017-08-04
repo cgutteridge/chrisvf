@@ -68,7 +68,7 @@ function chrisvf_get_info() {
       $chrisvf_cache["ob_events"] = $ob_events;
     }
     foreach( $chrisvf_cache["ob_events"] as $event ) {
-      $event["LOCATION"] = "The Observatory / Plaza";
+      $event["LOCATION"] = "The Observatory Bar";
       $event["LOCID"] = 8;
       if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
@@ -548,7 +548,8 @@ $a="";
           if( $cell['est'] ) {
             $classes.=' vf_grid_event_noend';
           }
-          $h[]= "<td class='$classes' colspan='".$cell['width']."' rowspan='$height' ".(empty($url)?"":"data-url='".$url."'").">";
+          $id = "g".preg_replace( '/-/','_',$cell['event']['UID'] );
+          $h[]= "<td id='$id' class='$classes' colspan='".$cell['width']."' rowspan='$height' ".(empty($url)?"":"data-url='".$url."'").">";
           if( $t1["start"]<=time() && $t1["end"]>=time() ) {
             $h[]="<div class='vf_grid_now'>NOW</div>";
           }
