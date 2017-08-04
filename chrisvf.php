@@ -53,32 +53,39 @@ function chrisvf_get_events() {
 function chrisvf_get_info() {
   global $chrisvf_cache;
   print "\n<!-- GET CACHE -->\n";
-  if( !empty( $chrisvf_cache )) {
+  if( !empty( $chrisvf_cache ) && !empty( $chrisvf_cache['events'])) {
     print "\n<!-- ...RAM CACHE -->\n";
     return $chrisvf_cache;
   }
     
-  $ical_url = "http://vfringe.ventnorexchange.co.uk/whatson/?ical=1";
+  #$ical_url = "http://vfringe.ventnorexchange.co.uk/whatson/?ical=1";
   $cache_file = "/tmp/vfringe-events.json";
   $cache_timeout = 30;
 
   if (file_exists($cache_file) && (filemtime($cache_file) > (time() - $cache_timeout))) {
     print "\n<!-- ...USE CACHE FILE -->\n";
-    $chrisvf_events = json_decode( file_get_contents( $cache_file ),true);
+    $chrisvf_cache = json_decode( file_get_contents( $cache_file ),true);
   } else {
     print "\n<!-- ...BUILD CACHE FILE -->\n";
-    $chrisvf_cache = array();
     $chrisvf_cache["events"]  = chrisvf_wp_events();
      
-    $ob_events = chrisvf_load_ical( "https://calendar.google.com/calendar/ical/co2vini9rdvmlv46ur167tufm4%40group.calendar.google.com/public/basic.ics" );
-    foreach( $ob_events as $event ) {
-      $event["LOCATION"] = "The Observatory";
+    $ob_events = @chrisvf_load_ical( "https://calendar.google.com/calendar/ical/co2vini9rdvmlv46ur167tufm4%40group.calendar.google.com/public/basic.ics" );
+    if( !empty( $ob_events ) ) {
+      $chrisvf_cache["ob_events"] = $ob_events;
+    }
+    foreach( $chrisvf_cache["ob_events"] as $event ) {
+      $event["LOCATION"] = "The Observatory / Plaza";
+      $event["LOCID"] = 8;
       $chrisvf_cache["events"][] = $event;
     }
 
-    $ob_events = chrisvf_load_ical( "https://calendar.google.com/calendar/ical/l1irfmsvtvgr2phlprdodo2j48%40group.calendar.google.com/public/basic.ics" );
-    foreach( $ob_events as $event ) {
+    $ps_events = @chrisvf_load_ical( "https://calendar.google.com/calendar/ical/l1irfmsvtvgr2phlprdodo2j48%40group.calendar.google.com/public/basic.ics" );
+    if( !empty( $ps_events ) ) {
+      $chrisvf_cache["ps_events"] = $ps_events;
+    }
+    foreach( $chrisvf_cache["ps_events"] as $event ) {
       $event["LOCATION"] = "Parkside";
+      $event["LOCID"] = 3;
       $chrisvf_cache["events"][] = $event;
     }
 
@@ -95,7 +102,7 @@ function chrisvf_wp_events() {
 	$args = array(
 		'eventDisplay' => 'custom',
 		'posts_per_page' => -1,
-//		'hide_upcoming' => true,
+		'tribeHideRecurrence'=>false,
 	);
 
 	// Verify the Intial Category
@@ -147,7 +154,7 @@ function chrisvf_wp_events() {
 		// add location if available
 		$location = $tec->fullAddressString( $event_post->ID );
 		if ( ! empty( $location ) ) {
-			$str_location = str_replace( array( ',', "\n" ), array( '\,', '\n' ), html_entity_decode( $location, ENT_QUOTES ) );
+			$str_location = html_entity_decode( $location, ENT_QUOTES );
 	
 			$item[ 'LOCATION' ]=  $str_location;
 		}
@@ -176,15 +183,23 @@ function chrisvf_wp_events() {
 
 #TODO BETTERER
 function chrisvf_munge_ical_event( $event ) {
-      if( $event["UID"] == "1545-1502272800-1502539200@vfringe.ventnorexchange.co.uk" ) { continue; } # 3 days 
-      if( $event["UID"] == "1716-1502064000-1502668799@vfringe.ventnorexchange.co.uk" ) { continue; } # before you start
-      if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor"; }
-      $event["LOCATION"] = preg_replace( "/,\s*United Kingdom/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*Ventnor/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*Isle of Wight/","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/,\s*PO38 ?.../","",$event["LOCATION"] );
-      $event["LOCATION"] = preg_replace( "/\s*PO38 ?.../","",$event["LOCATION"] );
-      return $event;
+  if( $event["UID"] == "1545-1502272800-1502539200@vfringe.ventnorexchange.co.uk" ) { continue; } # 3 days 
+  if( $event["UID"] == "1716-1502064000-1502668799@vfringe.ventnorexchange.co.uk" ) { continue; } # before you start
+  if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor"; }
+  if( preg_match( '/PO38 1QS/', $event["LOCATION"] )) { $event["LOCATION"] = "35 Maderia Road"; $event["LOCID"] = 1; }
+  if( preg_match( '/PO38 1RG/', $event["LOCATION"] )) { $event["LOCATION"] = "Bonchurch Old Church"; $event["LOCID"] = 2; }
+  if( preg_match( '/PO38 1LB/', $event["LOCATION"] )) { $event["LOCATION"] = "Parkside"; $event["LOCID"] = 3; }
+  if( preg_match( '/PO38 1SJ/', $event["LOCATION"] )) { $event["LOCATION"] = "Pier St. Playhouse"; $event["LOCID"] = 4; }
+  if( preg_match( '/PO38 1SW/', $event["LOCATION"] )) { $event["LOCATION"] = "St. Catherine's Church"; $event["LOCID"] = 5; }
+  if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Book Bus"; $event["LOCID"] = 6; } # what is this?
+  if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Errant Stage"; $event["LOCID"] = 7; } # what is this?
+  if( preg_match( '/Esplanade/', $event["LOCATION"] )) { $event["LOCATION"] = "The Observatory / Plaza"; $event["LOCID"] = 8; }
+  if( preg_match( '/PO38 1DX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Warehouse"; $event["LOCID"] = 9; }
+  if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "Trinity Church"; $event["LOCID"] = 10; }
+  if( preg_match( '/PO38 1NS/', $event["LOCATION"] )) { $event["LOCATION"] = "Trinity Theatre"; $event["LOCID"] = 11; } #same as church?
+  if( preg_match( '/PO38 1RZ/', $event["LOCATION"] )) { $event["LOCATION"] = "Ventnor Arts Club"; $event["LOCID"] = 12; }
+  if( preg_match( '/PO38 1SZ/', $event["LOCATION"] )) { $event["LOCATION"] = "Ventnor Winter Gardens"; $event["LOCID"] = 13; }
+  return $event;
 }
 
 function chrisvf_load_ical($ical_file) {
