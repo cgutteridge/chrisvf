@@ -173,8 +173,7 @@ function chrisvf_wp_events() {
 			$item['CATEGORIES'] = html_entity_decode( join( ',', $event_cats ), ENT_QUOTES );
 		}
 
-		$ical []= $item;
-
+      		$ical []= chrisvf_munge_ical_event( $item );
 	}
 
 	return $ical;
