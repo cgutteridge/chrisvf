@@ -17,6 +17,7 @@ Author URI: http://users.ecs.soton.ac.uk/cjg/
 add_shortcode('chrisvf_grid', 'chrisvf_render_grid');
 
 add_shortcode('chrisvf_itinerary', 'chrisvf_render_itinerary');
+add_shortcode('chrisvf_linked_itinerary', 'chrisvf_render_linked_itinerary');
 
 add_shortcode('chrisvf_itinerary_slug', 'chrisvf_render_itinerary_slug');
 
@@ -256,7 +257,7 @@ function chrisvf_load_venues() {
 /* GRID */
 
 // get the time_t for start and end of this event
-function chrisvf_event_times($event, $min_t=null, $max_t=null) {
+function chrisvf_event_time($event, $min_t=null, $max_t=null) {
   $allTimes = array();
 
   if( strlen($event["DTSTART"]) == 8 ) { return $allTimes; } # all day events look kak in the grid
@@ -274,10 +275,8 @@ function chrisvf_event_times($event, $min_t=null, $max_t=null) {
       $times['est'] = true;
     }
     
-    $allTimes []= $times;
-  #} 
+  return $times;
 
-  return $allTimes;
 }
 
 function chrisvf_render_grid( $atts = [], $content = null) {
@@ -342,17 +341,15 @@ function chrisvf_serve_grid_day( $date ) {
   // work out timeslots
   $times = array();
   foreach( $events as $event ) {
-    $ev_times = chrisvf_event_times($event);
+    $ev_time = chrisvf_event_time($event);
 #print_r( $ev_times );
 #print "<HR>";
-    foreach( $ev_times as $ev_time ) {
-      if( $ev_time['start'] >= $end_t ) { continue; } // starts after our window
-      if( $ev_time['end'] <= $start_t ) { continue; } // ends before our window
-      if( $ev_time['start'] < $start_t ) { $ev_time['start'] = $start_t; }
-      if( $ev_time['end']>$end_t ) { $ev_time['end'] = $end_t; }
-      $times[$ev_time['start']] = true;
-      $times[$ev_time['end']] = true;
-    }
+    if( $ev_time['start'] >= $end_t ) { continue; } // starts after our window
+    if( $ev_time['end'] <= $start_t ) { continue; } // ends before our window
+    if( $ev_time['start'] < $start_t ) { $ev_time['start'] = $start_t; }
+    if( $ev_time['end']>$end_t ) { $ev_time['end'] = $end_t; }
+    $times[$ev_time['start']] = true;
+    $times[$ev_time['end']] = true;
   }
 
   # assumes start_t is on the hour!?!
@@ -377,11 +374,9 @@ function chrisvf_serve_grid_day( $date ) {
   // build up grid  
   $grid = array(); # venue=>list of columns for venu
   foreach( $events as $event ) {
-    $ev_times =chrisvf_event_times($event);
+    $ev_time =chrisvf_event_times($event);
     $venue_id = $event["LOCATION"];
 
-    for( $slot_id = 0; $slot_id<sizeof($ev_times); $slot_id++ ) {
-      $ev_time = $ev_times[$slot_id];
 
       if( $ev_time['start'] >= $end_t ) { continue; } // starts after our window
       if( $ev_time['end'] <= $start_t ) { continue; } // ends before our window
@@ -430,7 +425,6 @@ function chrisvf_serve_grid_day( $date ) {
       $grid[$venue_id][$column_id][$start_i]["width"] = 1;
       $grid[$venue_id][$column_id][$start_i]["est"] = $ev_time['est'];
       $grid[$venue_id][$column_id][$start_i]["code"] = preg_replace( '/@.*/', '',  $event["UID"] );
-    }
   } // end of events loop
 #print "<pre>"; print_r( $grid ); print "</pre>";
 
@@ -523,7 +517,6 @@ function chrisvf_serve_grid_day( $date ) {
           $height = $cell['end_i'] - $cell['start_i'];
           $classes.= ' vf_grid_event';
 
-          list($nid,$slot_id) = preg_split( '/:/', $cell['code'] );
           $t1 = chrisvf_event_times($cell['event']);
           $t1 = $t1[$slot_id];
 $a="";
@@ -737,31 +730,24 @@ jQuery(document).ready(function(){
   return $h;
 }
 
-function chrisvf_get_itinerary() {
-
+function chrisvf_get_itinerary($ids=null) {
 
   global $chrisvf_itinerary;
+
   if( !isset( $chrisvf_itinerary ) ) {
     $chrisvf_itinerary = array();
-    // get itinerary from cache
     if( @$_COOKIE["itinerary"] ) {
       $chrisvf_itinerary["codes"] = preg_split( '/,/', $_COOKIE["itinerary"] );
     } else {
       $chrisvf_itinerary["codes"] = array();
     }
+    // get itinerary from cache
 
-    $nids = array();
-    foreach( $chrisvf_itinerary["codes"] as $code ) {
-      list( $nid,$slot) = preg_split( '/:/', $code );
-      $nids []= $nid;
-    }
     // load events
-    // code is just Id for now, but could include start time later...
     $events = chrisvf_get_events();
     $chrisvf_itinerary["events"] = array();
     foreach( $chrisvf_itinerary["codes"] as $code ) {
-      list( $nid,$slot) = preg_split( '/:/', $code );
-      $chrisvf_itinerary["events"][$code] = $events[$nid];
+      $chrisvf_itinerary["events"][$code] = $events[$code];
     }
   }
   return $chrisvf_itinerary;
@@ -769,7 +755,7 @@ function chrisvf_get_itinerary() {
   
 function chrisvf_render_itinerary( $atts = [], $content = null) {
   $itinerary = chrisvf_get_itinerary();
-  $venues= chrisvf_load_venues();
+  #$venues= chrisvf_load_venues();
 
   $h = array();
   $list = array();
@@ -782,7 +768,28 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
     $h[]= "<p ";
   }
   $h []= "class='vf_itinerary_none'>No items in your itinerary. Browse the website and add some.</p>";
+  if( count($itinerary['codes']) ) {
+    $h []= chrisvf_render_itinerary_table( $itinerary );
+    $link = "http://vfringe.ventnorexchange.co.uk/itinerary/saved?id=".urlencode( $_COOKIE["itinerary"] );
+    $msg = "My #VFringe plan: $link";
+    $h []= "<div><a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a></div>";
+  }
+  return join( "", $h) ;
+}
 
+function chrisvf_render_linked_itinerary( $atts = [], $content = null) {
+  $itinerary = array();
+  $itinerary["codes"] = preg_split( '/,/', $_GET['ids'] );
+  $events = chrisvf_get_events();
+  $itinerary["events"] = array();
+  foreach( $itinerary["codes"] as $code ) {
+    $itinerary["events"][$code] = $events[$code];
+  }
+  return chrisvf_render_itinerary_table( $itinerary, false );
+}
+
+function chrisvf_render_itinerary_table( $itinerary, $active = true ) {
+  $h = array(); 
   $h []="<table class='vf_itinerary_table'>";
 
   $h []="<tr>";
@@ -791,11 +798,10 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   $h []="<th>End</th>";
   $h []="<th>Event</th>";
   $h []="<th>Venue</th>";
-  $h []="<th>Actions</th>";
+  if( $active ) { $h []="<th>Actions</th>"; }
   $h []="</tr>";
 
   foreach( $itinerary['codes'] as $code ) {
-    list( $nid, $slot_id ) = preg_split( '/:/', $code );
     $event = @$itinerary['events'][$code];
     if( !$event ) {
       $time_t = 0;
@@ -812,7 +818,6 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
       $event = @$itinerary['events'][$code];
       $h []= "<tr id='${vf_js_id}_row'>";    
       if( $event ) {
-        list( $nid, $slot_id ) = preg_split( '/:/', $code );
         $h []= "<td>".date("l jS F",$start_time)."</td>";
         $h []= "<td>".date("H:i",$start_time)."</td>";
         if( @$event["DTEND"] ) {
@@ -835,10 +840,10 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
         $h []= "<td></td>";
         $h []= "<td></td>";
         $h []= "<td></td>";
-        $h []= "<td></td>";
+        $h []= "<td></td>"; 
         $h []= "<td>Error, event missing (may have been erased or altered. Sorry.)</td>";
       }
-      $h []= "<td><div class='vf_itinerary_button vf_itinerary_remove_button' id='${vf_js_id}_remove'>Remove from itinerary</div>";
+      if( $active ) { $h []= "<td><div class='vf_itinerary_button vf_itinerary_remove_button' id='${vf_js_id}_remove'>Remove from itinerary</div>"; }
       $h []= "</tr>";
       $script []= "jQuery( '#${vf_js_id}_remove' ).click(function(){ jQuery( '#${vf_js_id}_row' ).hide(); vfItineraryRemove( '".$code."' ) });\n";
     }
