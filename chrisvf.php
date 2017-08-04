@@ -150,8 +150,8 @@ function chrisvf_wp_events() {
 		}
 	
 		$item[ 'UID' ]= $event_post->ID . '-' . $time->start ;
-		$item[ 'SUMMARY' ]= str_replace( array( ',', "\n", "\r" ), array( '\,', '\n', '' ), html_entity_decode( strip_tags( $event_post->post_title ), ENT_QUOTES ) );
-		$item[ 'DESCRIPTION' ]= str_replace( array( ',', "\n", "\r" ), array( '\,', '\n', '' ), html_entity_decode( strip_tags( str_replace( '</p>', '</p> ', apply_filters( 'the_content', $event_post->post_content ) ) ), ENT_QUOTES ) );
+		$item[ 'SUMMARY' ]= $event_post->post_title ;
+		$item[ 'DESCRIPTION' ]= $event_post->post_content ;
 		$item[ 'URL' ]= get_permalink( $event_post->ID );
 
 		// add location if available
