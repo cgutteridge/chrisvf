@@ -771,7 +771,7 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   $h = array();
   $list = array();
   $script = array();
-  $h []= "<h1>Your Ventnor Fringe and Festival Itinerary</h1>";
+  #$h []= "<h1>Your Ventnor Fringe and Festival Itinerary</h1>";
   $h []= "<p>This list is saved on your browser using a cookie.</p>";
   if( count($itinerary['codes']) ) {
     $h[]= "<p style='display:none' ";
