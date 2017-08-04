@@ -770,7 +770,7 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   $h []= "class='vf_itinerary_none'>No items in your itinerary. Browse the website and add some.</p>";
   if( count($itinerary['codes']) ) {
     $h []= chrisvf_render_itinerary_table( $itinerary );
-    $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?id=".urlencode( $_COOKIE["itinerary"] );
+    $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?ids=".urlencode( $_COOKIE["itinerary"] );
     $msg = "My #VFringe plan: $link";
     $h []= "<div><a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a></div>";
   }
