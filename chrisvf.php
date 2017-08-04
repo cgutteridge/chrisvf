@@ -17,7 +17,7 @@ Author URI: http://users.ecs.soton.ac.uk/cjg/
 add_shortcode('chrisvf_grid', 'chrisvf_render_grid');
 
 add_shortcode('chrisvf_itinerary', 'chrisvf_render_itinerary');
-add_shortcode('chrisvf_linked_itinerary', 'chrisvf_render_linked_itinerary');
+add_shortcode('chrisvf_saved_itinerary', 'chrisvf_render_saved_itinerary');
 
 add_shortcode('chrisvf_itinerary_slug', 'chrisvf_render_itinerary_slug');
 
@@ -770,14 +770,14 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   $h []= "class='vf_itinerary_none'>No items in your itinerary. Browse the website and add some.</p>";
   if( count($itinerary['codes']) ) {
     $h []= chrisvf_render_itinerary_table( $itinerary );
-    $link = "http://vfringe.ventnorexchange.co.uk/itinerary/saved?id=".urlencode( $_COOKIE["itinerary"] );
+    $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?id=".urlencode( $_COOKIE["itinerary"] );
     $msg = "My #VFringe plan: $link";
     $h []= "<div><a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a></div>";
   }
   return join( "", $h) ;
 }
 
-function chrisvf_render_linked_itinerary( $atts = [], $content = null) {
+function chrisvf_render_saved_itinerary( $atts = [], $content = null) {
   $itinerary = array();
   $itinerary["codes"] = preg_split( '/,/', $_GET['ids'] );
   $events = chrisvf_get_events();
