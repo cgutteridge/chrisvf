@@ -21,11 +21,12 @@ table.vf_grid {
   /*background: url(grass.png) ;*/
   color: #444;
   font-family: Helvetica,"MontserratRegular";
-  font-size:80%;
+  font-size:90%;
   border-collapse: collapse;
-  border-right: solid 2px black;
-  border-bottom: solid 2px black;
+  border-right: solid 1px black;
+  border-bottom: solid 1px black;
   page-break-after: always;
+  border-spacing: 0px;
 }
 th.vf_grid_venue {
   vertical-align: bottom;
@@ -87,9 +88,25 @@ th.vf_grid_venue {
 .vf_grid_row_hour_even .vf_grid_freecell.vf_grid_busy {
   background-color: rgba(0,0,0,0.6) !important;
 }
+.vf_grid_cell_title {
+}
+.vf_grid_cat {
+  /*border: solid 1px #000;*/
+  padding: 2px 2px 0px 2px;
+  background-color: rgba(0,0,0,0.2);
+  font-size: 70%;
+  margin: 6px;
+  word-wrap: nowrap;
+  display: inline-block;
+}
+
+/* itinierary grid stuff */
 .vf_grid_itinerary {
-  background-color: #fff !important;
-  font-size: 150%;
+  background-color: #ccf !important;
+  color: #339;
+}
+.vf_grid_itinerary .vf_grid_cat {
+  /*background-color: rgba(255,255,255,0.2);*/
 }
 
 .vf_grid_clash {
@@ -102,12 +119,15 @@ th.vf_grid_venue {
   background-color:  #D2B48C !important;
   color: #333 !important;
 }
-.vf_grid_cell_title {
+.vf_grid_event_middle {
+  position: relative;
+  padding: 0 1em;
 }
-.vf_grid_cat {
-  border: solid 1px #000;
-  padding: 2px 2px 0px 2px;
-  font-size: 80%;
-  margin: 6px;
-  display: inline-block;
+.vf_grid_star { 
+  font-size: 200%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  color: #996;
 }

@@ -64,3 +64,16 @@
 .nownext_slide {
   background-color: #fff;
 }
+.vf_notification {   
+  position: fixed;
+  top: 35%;
+  left: 10%;
+  width: 80%;
+  opacity: 0.8; 
+  font-size: 250%;
+  padding: 0.5em;
+  background-color: black;
+  color: white;
+  text-align: center;
+  z-index: 99001;
+}

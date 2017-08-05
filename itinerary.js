@@ -1,3 +1,17 @@
+var vfNotification;
+function vfNotify(msg) {
+    if( !vfNotification ) { 
+        vfNotification = jQuery("<div class='vf_notification'></div>" );
+        jQuery('body').append( vfNotification );
+    }
+    vfNotification.text( msg );
+    vfNotification.show();
+    setTimeout( function() {
+        vfNotification.animate({opacity: 0}, function() { 
+            jQuery(this).hide();
+            jQuery(this).css('opacity',0.8);
+        }); }, 500 );
+}
 
 function vfItineraryAdd(nid) {
   var list = vfGetItinerary();
@@ -5,6 +19,7 @@ function vfItineraryAdd(nid) {
   list.push( nid ); // code
   vfSetItinerary(list);
   vfUpdateItineraryCount(list.length);
+  vfNotify( "Event added to itinerary" );
 }
 
 function vfItineraryRemove(nid) {
@@ -15,6 +30,7 @@ function vfItineraryRemove(nid) {
   }
   vfSetItinerary( newlist );
   vfUpdateItineraryCount(newlist.length);
+  vfNotify( "Event removed from itinerary" );
 }
 
 function vfUpdateItineraryCount(n) {

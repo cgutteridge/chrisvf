@@ -117,7 +117,6 @@ function chrisvf_wp_events() {
 	$events = tribe_get_events( $args );
 	$ical = array();
 	foreach( $events as $event_post ) {
-  		if( $event_post->ID == 1545) { continue; } # 3 days 
   		if( $event_post->ID == 1716) { continue; } # before you start
 		$full_format = 'Ymd\THis';
 		$utc_format = 'Ymd\THis\Z';
@@ -302,6 +301,53 @@ jQuery(document).ready(function() {
     var d = jQuery( this );
     window.open( d.attr( 'data-url' ));
   }).css( 'cursor','pointer' );
+
+  jQuery('.vf_grid_itinerary .vf_grid_star').text( '★' );
+  jQuery('.vf_grid_event').mouseenter( function() {
+    var ev = jQuery( this );
+    if( ev.hasClass( 'vf_grid_itinerary' ) ) {
+      // no action
+    } else {
+      jQuery( '.vf_grid_star', this ).text( '☆' );
+    }
+  });
+  jQuery('.vf_grid_event').mouseleave( function() {
+    var ev = jQuery( this );
+    if( ev.hasClass( 'vf_grid_itinerary' ) ) {
+      // no action
+    } else {
+      jQuery( '.vf_grid_star', this ).text( '' );
+    }
+  });
+  jQuery('.vf_grid_star').mouseenter( function() {
+    var stars = jQuery(this);
+    if( stars.parent().parent().hasClass( 'vf_grid_itinerary' ) ) {
+      stars.text( '☆' );
+    } else {
+      stars.text( '★' );
+    }
+  } );
+  jQuery('.vf_grid_star').mouseleave( function() {
+    var stars = jQuery(this);
+    if( stars.parent().parent().hasClass( 'vf_grid_itinerary' ) ) {
+      stars.text( '★' );
+    } else {
+      stars.text( '☆' );
+    }
+  } );
+  jQuery('.vf_grid_star').click( function() {
+    var stars = jQuery(this);
+    var code = stars.parent().parent().attr( 'data-code' );
+    if( stars.parent().parent().hasClass( 'vf_grid_itinerary' ) ) {
+      stars.parent().parent().removeClass( 'vf_grid_itinerary' );
+      vfItineraryRemove( code );
+    } else {
+      stars.parent().parent().addClass( 'vf_grid_itinerary' );
+      vfItineraryAdd( code );
+    }
+    return false;
+  } );
+    
 });
 </script>";
   return join( "", $h );
@@ -374,7 +420,7 @@ function chrisvf_serve_grid_day( $date ) {
   // build up grid  
   $grid = array(); # venue=>list of columns for venu
   foreach( $events as $event ) {
-    $ev_time =chrisvf_event_times($event);
+    $ev_time =chrisvf_event_time($event);
     $venue_id = $event["LOCATION"];
 
 
@@ -475,7 +521,7 @@ function chrisvf_serve_grid_day( $date ) {
     $h[]= "</th>\n";
   }
   $h[]= "<th></th>";
-  $h[]= "</tr>";
+  $h[]= "</tr>\n";
 
   $odd_row = true;
   foreach( $timeslots as $p=>$slot ) { 
@@ -517,41 +563,31 @@ function chrisvf_serve_grid_day( $date ) {
           $height = $cell['end_i'] - $cell['start_i'];
           $classes.= ' vf_grid_event';
 
-          $t1 = chrisvf_event_times($cell['event']);
-          $t1 = $t1[$slot_id];
-$a="";
-          $clash = false;
           if( @$itinerary['events'][$cell['code']] ) {
             $classes .= " vf_grid_itinerary";
-          } elseif( @$cell['event']->field_exclude_from_itinerary['und'][0]['value'] ) {
-            $classes .= " vf_grid_nonitinerary";
-          } else {
-            foreach( $itinerary['events'] as $code=>$i_event ) {
-              list($nid,$slot_id) = preg_split( '/:/', $code );
-              $t2 = chrisvf_event_times($i_event );
-              $t2 = $t2[$slot_id];
-              if( $t1['start']<$t2['end'] && $t1['end']>$t2['start'] ) { 
-#$a .= "<li>".$cell['code']." , $code";
-                $classes .= " vf_grid_clash";
-                $clash = true;
-              }
-            }
           }
+##$a .= "<li>".$cell['code']." , $code";
+ #               $classes .= " vf_grid_clash";
+ #               $clash = true;
+  #            }
+   #         }
     
           if( $cell['est'] ) {
             $classes.=' vf_grid_event_noend';
           }
           $id = "g".preg_replace( '/-/','_',$cell['event']['UID'] );
-          $h[]= "<td id='$id' class='$classes' colspan='".$cell['width']."' rowspan='$height' ".(empty($url)?"":"data-url='".$url."'").">";
+          $data = 
+          $h[]= "<td id='$id' data-code='".$cell['event']['UID']."' class='$classes' colspan='".$cell['width']."' rowspan='$height' ".(empty($url)?"":"data-url='".$url."'").">";
           if( $t1["start"]<=time() && $t1["end"]>=time() ) {
             $h[]="<div class='vf_grid_now'>NOW</div>";
           }
-$h[]= $a;
+          $h[]= "<div class='vf_grid_event_middle'>";
+          $h[]= "<div class='vf_grid_star'>";
+#          $h[]= "<div class='vf_grid_star_off' title='Add to your itinerary'><span class='vf_nhov'>☆</span><span class='vf_hov'>★</span></div>";
+#          $h[]= "<div class='vf_grid_star_on' title='Remove from itinerary'><span class='vf_hov'>☆</span><span class='vf_nhov'>★</span></div>";
+          $h[]= "</div>";
           $h []= "<div class='vf_grid_inner'>";
-          if( @$itinerary['events'][$cell['code']] ) {
-            $h[]= "<div style='font-style:italic;font-size:80%'>In your itinerary</div>";
-            $h[]= "<div style='margin:5px;font-size:200%;color:#000'>★</div>";
-          }
+
           $h[]= "<div class='vf_grid_cell_title'>". $cell['event']["SUMMARY"]."</div>";
           if( !empty( trim( $cell['event']['CATEGORIES'] ) ) ) { 
             foreach( preg_split( "/,/", $cell['event']['CATEGORIES'] ) as $cat ) {
@@ -559,9 +595,9 @@ $h[]= $a;
             }
           }
 
-          if( $clash ) { 
-            $h[]= "<div style='font-style:italic;font-size:80%;margin-top:1em'>Clashes with your itinerary</div>";
-          }
+#          if( $clash ) { 
+#            $h[]= "<div style='font-style:italic;font-size:80%;margin-top:1em'>Clashes with your itinerary</div>";
+#          }
           if( $cell['est'] ) {
             $h[]= "<div>[End time not yet known]</div>";
           }
@@ -569,15 +605,14 @@ $h[]= $a;
 #          $h[]= ",".$cell['width'];
 #          $h[]= ",".$cell['start_i'];
 #          $h[]= ",".$cell['end_i'];
-          $h[]= "</div>";
+          $h[]= "</div>"; # event inner
+          $h[]= "</div>"; # event middle
           $h[]= "</td>";
         } else if( $cell["used"] ) {
           $h[]= "";
         } else {
           foreach( $itinerary['events'] as $code=>$i_event ) {
-            list($nid,$slot_id) = preg_split( '/:/', $code );
-            $t2 = chrisvf_event_times($i_event );
-            $t2 = $t2[$slot_id];
+            $t2 = chrisvf_event_time($i_event );
             if( $slot['start']<$t2['end'] && $slot['end']>$t2['start'] ) { 
               $classes .= " vf_grid_busy";
             }
@@ -592,7 +627,7 @@ $h[]= $a;
       $odd_col = !$odd_col;
     }
     $h[]= "<th class='vf_grid_timeslot'>".date("H:i",$slot["start"])."</th>";
-    $h[]= "</tr>";
+    $h[]= "</tr>\n";
   }
 
   // Venue headings
@@ -605,7 +640,7 @@ $h[]= $a;
     $h[]= "</th>\n";
   }
   $h[]= "<th></th>";
-  $h[]= "</tr>";
+  $h[]= "</tr>\n";
 
   $h[]= "</table>";
   $h[]= "</div>";
@@ -772,7 +807,10 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
     $h []= chrisvf_render_itinerary_table( $itinerary );
     $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?ids=".urlencode( $_COOKIE["itinerary"] );
     $msg = "My #VFringe plan: $link";
-    $h []= "<div><a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a></div>";
+    $h []= "<div>";
+    $h []= "<a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a>";
+    $h []= "<a href='https://www.facebook.com/sharer/sharer.php?u=".urlencode($link)."' class='vf_itinerary_button'>Post to Facebook</a>";
+    $h []= "</div>";
   }
   return join( "", $h) ;
 }
@@ -787,7 +825,7 @@ function chrisvf_render_saved_itinerary( $atts = [], $content = null) {
   }
   $h = "";
   if( !empty( $_GET['title'] ) ) {
-    $h .= "<h2>".htmlspecialchars($_GET['title'] )."</h2>";
+    $h .= "<h2>".htmlspecialchars(preg_replace('/\\\\(.)/','$1', $_GET['title'] ))."</h2>";
   } 
   $h .= chrisvf_render_itinerary_table( $itinerary, false );
   return $h;
