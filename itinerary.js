@@ -6,10 +6,10 @@ function vfNotify(msg) {
     }
     vfNotification.text( msg );
     vfNotification.show();
+    vfNotification.css('opacity',0.8);
     setTimeout( function() {
         vfNotification.animate({opacity: 0}, function() { 
             jQuery(this).hide();
-            jQuery(this).css('opacity',0.8);
         }); }, 500 );
 }
 
