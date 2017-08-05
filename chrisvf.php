@@ -785,7 +785,12 @@ function chrisvf_render_saved_itinerary( $atts = [], $content = null) {
   foreach( $itinerary["codes"] as $code ) {
     $itinerary["events"][$code] = $events[$code];
   }
-  return chrisvf_render_itinerary_table( $itinerary, false );
+  $h = "";
+  if( !empty( $_GET['title'] ) ) {
+    $h .= "<h2>".htmlspecialchars($_GET['title'] )."</h2>";
+  } 
+  $h .= chrisvf_render_itinerary_table( $itinerary, false );
+  return $h;
 }
 
 function chrisvf_render_itinerary_table( $itinerary, $active = true ) {
