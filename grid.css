@@ -89,10 +89,10 @@ th.vf_grid_venue {
   background-color: rgba(0,0,0,0.6) !important;
 }
 .vf_grid_row_hour_odd .vf_grid_col_even.vf_grid_freecell.vf_grid_busy { 
-  background-color: rgba(0,0,0,0.64) !important;
+  background-color: rgba(0,0,0,0.74) !important;
 }
 .vf_grid_row_hour_even .vf_grid_col_even.vf_grid_freecell.vf_grid_busy { 
-  background-color: rgba(0,0,0,0.74) !important;
+  background-color: rgba(0,0,0,0.64) !important;
 }
 
 
