@@ -722,6 +722,14 @@ function chrisvf_print_itinerary_add( $atts = [], $content = null) {
   $code = $wp_query->post->ID."-".tribe_get_start_date( $wp_query->post->ID, false, 'U' );
   print "<div class='vf_itinerary_toggle' data-code='$code'></div>";
   print "<a href='/itinerary' class='vf_itinerary_button'>View itinerary</a>";
+
+  $link = get_permalink( $ep_query->post->ID );
+  $title = $wp_query->post->post_title ;
+  $dayofweek = tribe_get_start_date( $wp_query->post->ID, false, 'l' );
+
+  $msg = "This $dayofweek, I'm going to see $title at #VFringe17 $link";
+  print "<a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet this</a>";
+  print "<a href='https://www.facebook.com/sharer/sharer.php?u=".urlencode($link)."' class='vf_itinerary_button'>Share on Facebook</a>";
   print "<script>jQuery(document).ready(vfItineraryInit);</script>";
 }
 
@@ -873,7 +881,7 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   if( count($itinerary['codes']) ) {
     $h []= chrisvf_render_itinerary_table( $itinerary );
     $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?ids=".urlencode( $_COOKIE["itinerary"] );
-    $msg = "My #VFringe plan: $link";
+    $msg = "My #VFringe17 plan: $link";
     $h []= "<div>";
     $h []= "<a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a>";
     $h []= "<a href='https://www.facebook.com/sharer/sharer.php?u=".urlencode($link)."' class='vf_itinerary_button'>Post to Facebook</a>";
