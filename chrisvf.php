@@ -657,6 +657,7 @@ function chrisvf_render_random( $atts = [], $content = null) {
   shuffle( $events );
   $h = "";
   $r=0;
+  $h.= "<div style='margin-top:1em;text-align:center'><button id='rbutton'>STOP</button></div>";
   $h.= "<div style='height:10em; padding: 1em; text-align:centre'>";
   foreach( $events as $event ) {
    $time_t = strtotime($event["DTSTART"]);
@@ -680,7 +681,6 @@ function chrisvf_render_random( $atts = [], $content = null) {
    $h .="</div>";
   }
   $h .="</div>";
-  $h .= "<div style='margin-top:1em;text-align:center'><button id='rbutton'>STOP</button></div>";
 
   $h .= "<script>
 jQuery(document).ready( function() {
