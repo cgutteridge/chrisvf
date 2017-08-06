@@ -20,6 +20,7 @@ add_shortcode('chrisvf_itinerary', 'chrisvf_render_itinerary');
 add_shortcode('chrisvf_saved_itinerary', 'chrisvf_render_saved_itinerary');
 
 add_shortcode('chrisvf_itinerary_slug', 'chrisvf_render_itinerary_slug');
+add_shortcode('chrisvf_random', 'chrisvf_render_random');
 
 add_action( 'tribe_events_single_event_after_the_content', 'chrisvf_print_itinerary_add' );
 
@@ -34,6 +35,9 @@ function chrisvf_add_my_stylesheet() {
 
     wp_register_script( 'chrisvf-itinerary', plugins_url('itinerary.js', __FILE__) );
     wp_enqueue_script( 'chrisvf-itinerary' );
+
+    wp_register_script( 'chrisvf-roulette', plugins_url('roulette.min.js', __FILE__) );
+    wp_enqueue_script( 'chrisvf-roulette' );
 }
 
 /* FRINGE FUNCTIONS */
@@ -645,6 +649,70 @@ function chrisvf_serve_grid_day( $date ) {
   $h[]= "</table>";
   $h[]= "</div>";
   return join( "", $h );
+}
+
+
+function chrisvf_render_random( $atts = [], $content = null) {
+  $events = chrisvf_get_events();
+  shuffle( $events );
+  $h = "";
+  $r=0;
+  $h.= "<div style='background-color: #eee; height:10em; padding: 1em; text-align:centre'>";
+  foreach( $events as $event ) {
+   $time_t = strtotime($event["DTSTART"]);
+   ++$r;
+   $h .="<div class='rcell' id='r$r' style='".($r==1?"":"display:none;")." text-align:center;'>";
+   $h .= "<div style='font-size:150%'>";
+   $h .=$event["SUMMARY"];
+   $h .= " @ ";
+   $h .=$event["LOCATION"];
+   $h .= " <br/> ";
+   $time_t = strtotime($event["DTSTART"]);
+   $h .= date("l jS",$time_t);
+   $h .= " - ";
+   $h .= date("H:i",$time_t);
+   $h .="</div>";
+   $code = $event["UID"];
+   if( !empty( $event["URL"] ) ) {
+     $h .= "<a href='".$event["URL"]."' class='vf_itinerary_button'>More information</a>";
+   }
+   $h.= "<div class='vf_itinerary_toggle' data-code='$code'></div>";
+   $h .="</div>";
+  }
+  $h .="</div>";
+  $h .= "<div style='margin-top:1em;text-align:center'><button id='rbutton'>STOP</button></div>";
+
+  $h .= "<script>
+jQuery(document).ready( function() {
+  var maxr=$r;
+  var r = 1;
+  var rrunning = true;
+  setInterval( nextr, 50 );
+  function nextr() {
+    if( !rrunning ) { return; }
+    r++;
+    if( r>maxr ) { r=1; }
+    jQuery( '.rcell' ).hide();
+    jQuery( '#r'+r ).show();
+  }
+  jQuery( '#rbutton' ).click( function() {
+    if( rrunning ) {
+      jQuery( '#rbutton' ).text( 'START' );
+      rrunning = false; 
+    } else {
+      jQuery( '#rbutton' ).text( 'STOP' );
+      rrunning = true; 
+    }    
+  });
+});
+jQuery(document).ready(vfItineraryInit);
+</script>
+<style>
+.vf_itinerary_button { background-color: inherit !important; }
+</style>
+";
+   //print_r( $events );
+  return $h;
 }
 
 
