@@ -658,7 +658,7 @@ function chrisvf_render_random( $atts = [], $content = null) {
   $h = "";
   $r=0;
   $h.= "<div style='margin-top:1em;text-align:center'><button id='rbutton'>STOP</button></div>";
-  $h.= "<div style='min-height:10em; padding: 1em; text-align:centre'>";
+  $h.= "<div style='min-height:90%; padding: 1em; text-align:centre'>";
   foreach( $events as $event ) {
    $time_t = strtotime($event["DTSTART"]);
    ++$r;
