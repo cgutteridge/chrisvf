@@ -708,7 +708,6 @@ jQuery(document).ready( function() {
 jQuery(document).ready(vfItineraryInit);
 </script>
 <style>
-.vf_itinerary_button { background-color: inherit !important; }
 </style>
 ";
    //print_r( $events );
