@@ -1132,8 +1132,8 @@ var bounds = L.latLngBounds([]);
             $url= $event["URL"];
             $name= $event["SUMMARY"];
             $popup .= "<div style='color:#000;'>$time - ";
-            if( !empty($url) ) { $popup .= "<a href='$url'>".htmlspecialchars($name)."</a>"; }
-            else { $popup .= htmlspecialchars($name);
+            if( !empty($url) ) { $popup .= "<a href='$url'>".$name."</a>"; }
+            else { $popup .= $name;
 
             if( $free ) { $popup .= " - Free Fringe"; }
           }
