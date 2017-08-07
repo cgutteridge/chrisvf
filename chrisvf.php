@@ -441,14 +441,15 @@ function chrisvf_serve_grid_day( $date ) {
   $grid = array(); # venue=>list of columns for venu
   foreach( $events as $event ) {
     $ev_time =chrisvf_event_time($event);
-    $venue_id = $event["LOCATION"];
-    $venues[$event["SORTCODE"]] = $venue_id;
 
 
       if( $ev_time['start'] >= $end_t ) { continue; } // starts after our window
       if( $ev_time['end'] <= $start_t ) { continue; } // ends before our window
       if( $ev_time['start'] < $start_t ) { $ev_time['start'] = $start_t; }
       if( $ev_time['end']>$end_t ) { $ev_time['end'] = $end_t; }
+
+    $venue_id = $event["LOCATION"];
+    $venues[$event["SORTCODE"]] = $venue_id;
 
       $start_i = $timemap[$ev_time['start']];
       $end_i = $timemap[$ev_time['end']];
@@ -496,7 +497,7 @@ function chrisvf_serve_grid_day( $date ) {
 
   // venue ids. Could/should sort this later
   ksort( $venues );
-print_r($venues);
+#print_r($venues);
 
   // see if we can expand any events to fill the space available.
   foreach( $venues as $venue_id ) {
