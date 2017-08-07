@@ -1100,11 +1100,11 @@ var bounds = L.latLngBounds([]);
 
    //popupAnchor: [0, -40]
 
-    $popup = "<h2>".htmlspecialchars($place["name"])."</h2>";
+    $popup = "<p style='color: #000;font-size:80%'>".htmlspecialchars($place["name"])."</h2>";
     if( @$venueEvents[$place["sortcode"]] ) {
       ksort( $venueEvents[$place["sortcode"]]);
       foreach( $venueEvents[$place["sortcode"]] as $day ) {
-        $popup .= "<h3 style='margin-bottom:3px'>".$day["label"]."</h3>";
+        $popup .= "<h3 style='color: #000;font-size:80%; margin-bottom:3px'>".$day["label"]."</h3>";
         ksort( $day['times'] );
         foreach( $day['times'] as $time=>$events ) {
           foreach( $events as $event ) {
@@ -1157,6 +1157,9 @@ var bounds = L.latLngBounds([]);
   $h.= "map.fitBounds( bounds );\n";
   $h.= "});";
   $h.= "</script>\n";
+  $h.= "<style>
+</style>";
+
   return $h;
 }
 
