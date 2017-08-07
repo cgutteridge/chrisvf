@@ -99,7 +99,7 @@ function chrisvf_get_info() {
     $chrisvf_cache["venues"] = array();
     foreach( $chrisvf_cache["events"] as $event ) {
       if( empty( $event["LOCATION"] ) ){ continue; }
-      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"], "sortcode"=>$event["SORTCODE"], "number"=>$event["LOCID"] );
+      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"], "loccode"=>$event["LOCCODE"], "sortcode"=>$event["SORTCODE"], "number"=>$event["LOCID"] );
       $chrisvf_cache["venues"][ $event["LOCATION"] ]  = $loc;
     }
 
@@ -228,9 +228,11 @@ function chrisvf_munge_ical_event( $event ) {
   if( $vmap[$event["LOCATION"]] ) {
     $event["LOCID"] = floor($vmap[$event["LOCATION"]] );
     $s = $event["LOCID"];
+    $event["LOCCODE"]=sprintf( "%03d",  floor($s));
   }
   else {
     $s = 99;
+    $event["LOCCODE"]= "999".$event["LOCATION"];
   }
   $event["SORTCODE"]=sprintf( "%03d%s",  $s*10, $event["LOCATION"] );
 #print "<hr >";
@@ -1048,7 +1050,7 @@ function chrisvf_render_map() {
       $date = date( "Y-m-d", $time_t );
       $dateLabel = date( "l jS F", $time_t );
       $time = date( "H:i", $time_t );
-      $tid = $event["SORTCODE"];
+      $tid = $event["LOCCODE"];
 
       $free = false;
       if( preg_match( '/Free Fringe/', $event["CATEGORIES"] ) ) { $free = true; }
@@ -1113,9 +1115,9 @@ var bounds = L.latLngBounds([]);
    //popupAnchor: [0, -40]
 
     $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["name"])."</h2>";
-    if( @$venueEvents[$place["sortcode"]] ) {
-      ksort( $venueEvents[$place["sortcode"]]);
-      foreach( $venueEvents[$place["sortcode"]] as $day ) {
+    if( @$venueEvents[$place["loccode"]] ) {
+      ksort( $venueEvents[$place["loccode"]]);
+      foreach( $venueEvents[$place["loccode"]] as $day ) {
         $popup .= "<h3 style='color: #000;font-size:120%; margin-bottom:3px'>".$day["label"]."</h3>";
         ksort( $day['times'] );
         foreach( $day['times'] as $time=>$events ) {
@@ -1135,11 +1137,11 @@ var bounds = L.latLngBounds([]);
       }
     }
     $nowText = "";
-    if( @$nowFree[ $place["sortcode"] ] ) {
-      $nowText .= join( "", $nowFree[ $place["sortcode"] ] );
+    if( @$nowFree[ $place["loccode"] ] ) {
+      $nowText .= join( "", $nowFree[ $place["loccode"] ] );
     }
-    if( @$soon[ $place["sortcode"] ] ) {
-      $nowText .= join( "", $soon[ $place["sortcode"] ] );
+    if( @$soon[ $place["loccode"] ] ) {
+      $nowText .= join( "", $soon[ $place["loccode"] ] );
     }
     if( $nowText != "" ) {
       $nowText = "'$nowText'";
