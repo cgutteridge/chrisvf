@@ -75,7 +75,7 @@ function chrisvf_get_info() {
     foreach( $chrisvf_cache["ob_events"] as $event ) {
       $event["LOCATION"] = "The Observatory Bar";
       $event["LOCID"] = 8;
-      $event["SORTCODE"]= "008The Observatory Bar";
+      $event["SORTCODE"]= "080The Observatory Bar";
       if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
     }
@@ -86,7 +86,7 @@ function chrisvf_get_info() {
     }
     foreach( $chrisvf_cache["ps_events"] as $event ) {
       $event["LOCATION"] = "Parkside";
-      $event["SORTCODE"]= "003Parkside";
+      $event["SORTCODE"]= "030Parkside";
       $event["LOCID"] = 3;
       if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
