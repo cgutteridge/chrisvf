@@ -1115,7 +1115,7 @@ var bounds = L.latLngBounds([]);
     if( $place['number']==99 ) { 
       $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
     }
-    if( $place['loccode']==="001" ) { 
+    if( $place['loccode']==="000" ) { 
       $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
       $icon_size = '40,47';
       $icon_anchor = '20,23';
