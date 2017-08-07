@@ -1068,6 +1068,13 @@ array("GEO"=>array(50.59396,-1.20265),"NAME"=>"The Green Room: Ventnor Town Coun
 array("GEO"=>array(50.5953723,-1.2043726),"NAME"=>"The Tea House", "VENUES"=>array( "990The Tea House"), "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=T" ),
 array("GEO"=>array(50.59591,-1.20311),"NAME"=>"Ventnor Town", "VENUES"=>array( "990Ventnor Town"),  "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=V"),
 array("GEO"=>array(50.59439,-1.1991 ),"NAME"=>"Wheelers Bay", "VENUES"=>array( "990Wheelers Bay"),  "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=W"),
+
+array( "NAME"=>"Cashpoint", "GEO"=>array( 50.59527,-1.20146 ), "ICON"=>"http://data.southampton.ac.uk/map-icons/Offices/atm.png" ),
+array( "NAME"=>"Cashpoint", "GEO"=>array( 50.59555,-1.20368 ),"ICON"=>"http://data.southampton.ac.uk/map-icons/Offices/atm.png" ),
+array( "NAME"=>"Cashpoint (inside Co-op)", "GEO"=>array( 50.5949,-1.20554 ),"ICON"=>"http://data.southampton.ac.uk/map-icons/Offices/atm.png" ),
+array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59328,-1.20505 ),"ICON"=>"http://data.southampton.ac.uk/map-icons/Health/toilets.png" ),
+array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59549,-1.20614 ),"ICON"=>"http://data.southampton.ac.uk/map-icons/Health/toilets.png" ),
+array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://data.southampton.ac.uk/map-icons/Health/toilets.png" ),
 );
 
   $venueToPOI = array();
