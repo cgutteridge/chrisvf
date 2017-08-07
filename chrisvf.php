@@ -21,6 +21,7 @@ add_shortcode('chrisvf_saved_itinerary', 'chrisvf_render_saved_itinerary');
 
 add_shortcode('chrisvf_itinerary_slug', 'chrisvf_render_itinerary_slug');
 add_shortcode('chrisvf_random', 'chrisvf_render_random');
+add_shortcode('chrisvf_map', 'chrisvf_render_map');
 
 add_action( 'tribe_events_single_event_after_the_content', 'chrisvf_print_itinerary_add' );
 
@@ -36,8 +37,11 @@ function chrisvf_add_my_stylesheet() {
     wp_register_script( 'chrisvf-itinerary', plugins_url('itinerary.js', __FILE__) );
     wp_enqueue_script( 'chrisvf-itinerary' );
 
-    wp_register_script( 'chrisvf-roulette', plugins_url('roulette.min.js', __FILE__) );
-    wp_enqueue_script( 'chrisvf-roulette' );
+    wp_register_script( 'chrisvf-leaflet', plugins_url('leaflet.js', __FILE__) );
+    wp_register_script( 'chrisvf-leaflet-label', plugins_url('leaflet.label.js', __FILE__) );
+    wp_register_style( 'chrisvf-leaflet', plugins_url('leaflet.css', __FILE__) );
+    wp_register_style( 'chrisvf-leaflet-label', plugins_url('leaflet.label.css', __FILE__) );
+
 }
 
 /* FRINGE FUNCTIONS */
@@ -275,11 +279,6 @@ function chrisvf_load_pois() {
   return array();
 }
 
-function chrisvf_load_venues() {
-  return array();
-}
-
-
 
 
 
@@ -388,7 +387,6 @@ jQuery(document).ready(function() {
 function chrisvf_serve_grid_day( $date ) {
   // load venues
 #j.  global $vf_venues;
-  #$vf_venues = chrisvf_load_venues();
   $day_start = "08:00:00 BST";
   $day_end = "02:00:00 BST";
 
@@ -799,7 +797,6 @@ function chrisvf_now_and_next() {
    
   $entities = array();
 
-  $venues= chrisvf_load_venues();
 
   $list = array();
   foreach( $events as $event ) {
@@ -882,7 +879,6 @@ function chrisvf_get_itinerary($ids=null) {
   
 function chrisvf_render_itinerary( $atts = [], $content = null) {
   $itinerary = chrisvf_get_itinerary();
-  #$venues= chrisvf_load_venues();
 
   $h = array();
   $list = array();
@@ -1035,167 +1031,133 @@ function chrisvf_render_itinerary_table( $itinerary, $active = true ) {
 /* MAP */
 
 
-function chrisvf_serve_map() {
-  $venues= chrisvf_load_venues();
+function chrisvf_render_map() {
   $pois= chrisvf_load_pois();
-  $places = array_merge( $venues, $pois);
-
-  $year2016 = 1451606400;
-
-
-  // load events
-  $query = new EntityFieldQuery();
-  $entities = $query->entityCondition('entity_type', 'node')
-                 ->addTag('efq_debug')
-                 ->entityCondition('bundle','event' )
-                 ->propertyCondition( 'status', 1 )
-                 ->fieldCondition( 'field_event_classification', 'value', array( 'vFringe','Festival' ) ,"IN" )
-                 ->fieldCondition('field_date','value',$year2016,'>' )
-                 ->execute();
-  @$events = entity_load('node',array_keys($entities['node']));
+  $info = chrisvf_get_info();
+  $places = array_merge( $info['venues'], $pois);
 
   $venueEvents = array();
   $nowFree = array();
   $soon = array();
-  foreach( $events as $event ) {
-    foreach( $event->field_date['und'] as $date ) {
-        
-      $start = $date["value"]." ".$date["timezone_db"]; 
-      $time_t = strtotime( $start );
-      $end = $date["value2"]." ".$date["timezone_db"]; 
-      $end_t = strtotime( $end );
+  foreach( $info['events'] as $event ) {
+      $time_t = strtotime($event["DTSTART"]);
+      $end_t = strtotime($event["DTEND"]);
       if( $end_t < time() ) { continue; } # skip done events
 
       $date = date( "Y-m-d", $time_t );
       $dateLabel = date( "l jS F", $time_t );
       $time = date( "H:i", $time_t );
-      $tid = $event->field_venue['und'][0]['tid'];
+      $tid = $event["SORTCODE"];
 
       $free = false;
-      if( @$event->field_promo['und'] ) {
-        foreach( $event->field_promo['und'] as $value ) {
-          if( $value['tid'] == 17 || $value['tid'] == 212 ) { $free = true; }
-        }
-      }
+      if( preg_match( '/Free Fringe/', $event["CATEGORIES"] ) ) { $free = true; }
 
       @$venueEvents[$tid][$date]['label'] = $dateLabel;
       @$venueEvents[$tid][$date]['times'][$time][]=$event;
 
       if( $time_t>time() && $time_t<time()+90*60 ) { 
         #starts in the next 90 minutes
-        $soon[$tid][]= "<div><strong>".date( "ga",$time_t)." - ". htmlspecialchars( $event->title, ENT_QUOTES ) ."</strong></div>";
+        $soon[$tid][]= "<div><strong>".date( "ga",$time_t)." - ". htmlspecialchars( $event['SUMMARY'], ENT_QUOTES ) ."</strong></div>";
       }
       if( $time_t<time() && $end_t>time()+10*60 && $free ) {  # free, 
         #starts in the next 90 minutes
-        $nowFree[$tid][]= "<div><strong>Now - ". htmlspecialchars(  $event->title,  ENT_QUOTES )."</strong></div>" ;
+        $nowFree[$tid][]= "<div><strong>Now - ". htmlspecialchars(  $event['SUMMARY'],  ENT_QUOTES )."</strong></div>" ;
       }
-    }
   }
-?>
-<html>
-<meta charset="UTF-8" />
-<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css' />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<style>
-html, body {
-  margin: 0;
-  color: #444;
-  font-family: "MontserratRegular";
-}
-</style>
-<?php
-  $path = drupal_get_path('module', 'chrisvf_extras');
-  print '<link rel="stylesheet" href="/'.$path.'/leaflet.css" />';
-  print '<link rel="stylesheet" href="/'.$path.'/leaflet.label.css" />';
-  print '<script src="/'.$path.'/leaflet.js"></script>';
-  print '<script src="/'.$path.'/leaflet.label.js"></script>';
+  wp_enqueue_script( 'chrisvf-leaflet' );
+  wp_enqueue_script( 'chrisvf-leaflet-label' );
+  wp_enqueue_style( 'chrisvf-leaflet' );
+  wp_enqueue_style( 'chrisvf-leaflet-label' );
+
   global $mapid;
   $id = "map".(++$mapid); // make sure the js uses a unique ID in case multiple maps on a page
-  print "<div id='$id' style='height: 100%; width: 100%;'></div>\n";
-  print "<script>\n";
-?>
+  $h = "";
+  $h.= "<div id='$id' style='height: 600px; width: 100%;'>HELLO</div>\n";
+  $h.= "<script>\n";
+  $h.="
+jQuery( document ).ready( function() {
 var map;
 var bounds = L.latLngBounds([]);
 (function(mapid){
   map = L.map(mapid,{scrollWheelZoom: false});
   var icon;
   var marker;
-  L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>', maxZoom: 20 }).addTo(map);
-<?php
-  print "}('$id'));\n";
+  L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution: 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>', maxZoom: 20 }).addTo(map);
+ }('$id'));
 
-?>
   var imageUrl = 'http://ventnorexchange.co.uk/sites/default/files/fringedatesarcpink.png';
   var imageBounds = [ [50.59150, -1.20201], [50.58901, -1.21435] ];
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
-<?php
-
+";
 
   foreach( $places as $place ) {
-    $lat_long = chrisvf_taxonomy_term_single_value($place,'field_lat_long');
-    $icon_url = chrisvf_taxonomy_term_single_value($place,'field_icon_url','http://data.southampton.ac.uk/images/numbericon.png?n=X');
-    $icon_size = chrisvf_taxonomy_term_single_value($place,'field_icon_size','32,37');
-    $icon_anchor = chrisvf_taxonomy_term_single_value($place,'field_icon_anchor','16,37');
+    $lat_long = $place["geo"];
+    if( empty($lat_long) ) { continue; }
 
-    if( !$lat_long ) { continue; }
+    $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=X';
+    $icon_size = '32,37';
+    $icon_anchor = '16,37';
+
    //popupAnchor: [0, -40]
 
-    $popup = "<h2>".htmlspecialchars($place->name)."</h2>";
-    if( @$venueEvents[$place->tid] ) {
-      ksort( $venueEvents[$place->tid] );
-      foreach( $venueEvents[$place->tid] as $day ) {
+    $popup = "<h2>".htmlspecialchars($place["name"])."</h2>";
+    if( @$venueEvents[$place["sortcode"]] ) {
+      ksort( $venueEvents[$place["sortcode"]]);
+      foreach( $venueEvents[$place["sortcode"]] as $day ) {
         $popup .= "<h3 style='margin-bottom:3px'>".$day["label"]."</h3>";
         ksort( $day['times'] );
         foreach( $day['times'] as $time=>$events ) {
           foreach( $events as $event ) {
             $free = false;
-            if( @$event->field_promo['und'] ) {
-              foreach( $event->field_promo['und'] as $value ) {
-                if( $value['tid'] == 17 || $value['tid'] == 212 ) { $free = true; }
-              }
-            }
+            if( preg_match( '/Free Fringe/', $event["CATEGORIES"] ) ) { $free = true; }
             
-            $url= url("node/".$event->nid);
-            $popup .= "<div>$time - <a href='$url'>".htmlspecialchars( $event->title )."</a>".($free?" - Free Fringe":"")."</div>";
+            $url= $event["URL"];
+            $name= $event["SUMMARY"];
+            $popup .= "<div>$time - ";
+            if( !empty($url) ) { $popup .= "<a href='$url'>".htmlspecialchars($name)."</a>"; }
+            else { $popup .= htmlspecialchars($name);
+
+            if( $free ) { $popup .= " - Free Fringe"; }
           }
         }
       }
     }
     $nowText = "";
-    if( @$nowFree[ $place->tid ] ) {
-      $nowText .= join( "", $nowFree[ $place->tid ] );
+    if( @$nowFree[ $place["sortcode"] ] ) {
+      $nowText .= join( "", $nowFree[ $place["sortcode"] ] );
     }
-    if( @$soon[ $place->tid ] ) {
-      $nowText .= join( "", $soon[ $place->tid ] );
+    if( @$soon[ $place["sortcode"] ] ) {
+      $nowText .= join( "", $soon[ $place["sortcode"] ] );
     }
     if( $nowText != "" ) {
       $nowText = "'$nowText'";
     } else {
       $nowText = 'false';
     }
-?>
+  }
+  $h.="
   (function(lat_long,icon_url,icon_size,icon_anchor, name, popupText,nowText){
     icon = L.icon( { iconUrl: icon_url, iconSize: icon_size, iconAnchor: icon_anchor, labelAnchor: [16, -18], popupAnchor: [ 0,-40 ] } );
-    var label = "<strong>"+name+"</strong>"; 
+    var label = \"<strong>\"+name+\"</strong>\"; 
     var labelOpts = { noHide: false };
     var markerOpts = { icon:icon };
     markerOpts.riseOnHover = true;
     labelOpts.direction = 'right';
     var popup = L.popup();
-    popup.setContent( '<div style="max-height: 300px; overflow:auto">'+popupText+'</div>' );
+    popup.setContent( '<div style=\"max-height: 300px; overflow:auto\">'+popupText+'</div>' );
     var marker = L.marker(lat_long, markerOpts ).bindPopup(popup).addTo(map);
     if( nowText ) {
       marker.bindLabel(nowText, { noHide: true, direction: 'left' } );
     }
 
     bounds.extend( lat_long );
-<?php 
-    print "}([$lat_long],'$icon_url',[$icon_size],[$icon_anchor],'".htmlspecialchars($place->name, ENT_QUOTES)."','".preg_replace("/'/","\\'",$popup)."',$nowText));\n";
+}([$lat_long],'$icon_url',[$icon_size],[$icon_anchor],'".htmlspecialchars($place["SUMMARY"], ENT_QUOTES)."','".preg_replace("/'/","\\'",$popup)."',$nowText));\n";
   }
 
-  print "map.fitBounds( bounds );\n";
-  print "</script>\n";
-  print "</html>\n";
+  $h.= "map.fitBounds( bounds );\n";
+  $h.= "});";
+  $h.= "</script>\n";
+  return $h;
 }
 
 // eat a sea horse
