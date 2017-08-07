@@ -202,7 +202,7 @@ function chrisvf_munge_ical_event( $event ) {
 
   $vmap=array( 
 
-"Ventnor Exchange"=>-1,
+"Ventnor Exchange"=>0,
 "35 Madeira Road"=>1,
 "Bonchurch Old Church"=>2,
 "Parkside"=>3,
@@ -211,12 +211,12 @@ function chrisvf_munge_ical_event( $event ) {
 # Bookbus would be 6 but is at st cath's
 # Errant stage would be 7 but is at Plaza
 "The Plaza"=> 8.1,
-"The Observatory Bar"=>8.2,
+"The Observatory Bar"=>8,
 "The Warehouse"=>9,
-"Holy Trinity Church"=>11.1,
+"Holy Trinity Church"=>11,
 "Trinity Theatre (Trinity Church Hall)"=>11.2,
 "Ventnor Arts Club"=>12,
-"Ventnor Winter Gardens"=>13.1,
+"Ventnor Winter Gardens"=>13,
 "Ventnor Winter Gardens: The Long Room"=>13.2,
 "Ventnor Winter Gardens: Balmoral Room"=>13.3,
 "Secret Venue"=>99,
@@ -1067,6 +1067,10 @@ function chrisvf_render_map() {
         $nowFree[$tid][]= "<div><strong>Now - ". htmlspecialchars(  $event['SUMMARY'],  ENT_QUOTES )."</strong></div>" ;
       }
   }
+  if( @$_GET['debug'] ) {
+    $h []= "<pre>".htmlspecialchars(print_r($venueEvents,true))."</pre>";
+  }
+ 
   wp_enqueue_script( 'chrisvf-leaflet' );
   wp_enqueue_script( 'chrisvf-leaflet-label' );
   wp_enqueue_style( 'chrisvf-leaflet' );
@@ -1106,7 +1110,7 @@ var bounds = L.latLngBounds([]);
     if( $place['number']==99 ) { 
     $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
     }
-    if( $place['number']==-1 ) { 
+    if( $place['number']==0 ) { 
       $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
       $icon_size = '40,47';
       $icon_anchor = '20,23';
