@@ -93,7 +93,7 @@ function chrisvf_get_info() {
     $chrisvf_cache["venues"] = array();
     foreach( $chrisvf_cache["events"] as $event ) {
       if( empty( $event["LOCATION"] ) ){ continue; }
-      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"] );
+      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"], "sortcode"=>$event["SORTCODE"], "number"=>$event["LOCID"] );
       $chrisvf_cache["venues"][ $event["LOCATION"] ]  = $loc;
     }
 
@@ -192,20 +192,41 @@ function chrisvf_wp_events() {
 #TODO BETTERER
 function chrisvf_munge_ical_event( $event ) {
   $event["UID"] = preg_replace( "/@.*$/", "", $event["UID"] );
-  if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor"; }
-  #if( preg_match( '/PO38 1QS/', $event["LOCATION"] )) { $event["LOCATION"] = "35 Maderia Road"; $event["LOCID"] = 1; }
-  #if( preg_match( '/PO38 1RG/', $event["LOCATION"] )) { $event["LOCATION"] = "Bonchurch Old Church"; $event["LOCID"] = 2; }
-  #if( preg_match( '/PO38 1LB/', $event["LOCATION"] )) { $event["LOCATION"] = "Parkside"; $event["LOCID"] = 3; }
-  #if( preg_match( '/PO38 1SJ/', $event["LOCATION"] )) { $event["LOCATION"] = "Pier St. Playhouse"; $event["LOCID"] = 4; }
-  #if( preg_match( '/PO38 1SW/', $event["LOCATION"] )) { $event["LOCATION"] = "St. Catherine's Church"; $event["LOCID"] = 5; }
-  #if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Book Bus"; $event["LOCID"] = 6; } # what is this?
-  #if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Errant Stage"; $event["LOCID"] = 7; } # what is this?
-  #if( preg_match( '/Esplanade/', $event["LOCATION"] )) { $event["LOCATION"] = "The Observatory / Plaza"; $event["LOCID"] = 8; }
-  #if( preg_match( '/PO38 1DX/', $event["LOCATION"] )) { $event["LOCATION"] = "The Warehouse"; $event["LOCID"] = 9; }
-  #if( preg_match( '/PO38 1XX/', $event["LOCATION"] )) { $event["LOCATION"] = "Trinity Church"; $event["LOCID"] = 10; }
-  #if( preg_match( '/PO38 1NS/', $event["LOCATION"] )) { $event["LOCATION"] = "Trinity Theatre"; $event["LOCID"] = 11; } #same as church?
-  #if( preg_match( '/PO38 1RZ/', $event["LOCATION"] )) { $event["LOCATION"] = "Ventnor Arts Club"; $event["LOCID"] = 12; }
-  #if( preg_match( '/PO38 1SZ/', $event["LOCATION"] )) { $event["LOCATION"] = "Ventnor Winter Gardens"; $event["LOCID"] = 13; }
+  if( empty($event["LOCATION"] )) { $event["LOCATION"] = "Ventnor Town"; }
+
+  $vmap=array( 
+
+"Ventnor Exchange"=>-1,
+"35 Madeira Road"=>1,
+"Bonchurch Old Church"=>2,
+"Parkside"=>3,
+"Pier St. Playhouse"=>4,
+"St. Catherines Church"=>5,
+# Bookbus would be 6 but is at st cath's
+# Errant stage would be 7 but is at Plaza
+"The Plaza"=> 8.1,
+"The Observatory Bar"=>8.2,
+"The Warehouse"=>9,
+"Holy Trinity Church"=>11.1,
+"Trinity Theatre (Trinity Church Hall)"=>11.2,
+"Ventnor Arts Club"=>12,
+"Ventnor Winter Gardens"=>13.1,
+"The Long Room"=>13.2,
+"Ventnor Winter Gardens: Balmoral Room"=>13.3,
+#"The Tea House"=>101,
+#"Ventnor Town"=>102,
+#"Secret Venue"=>103,
+#"Wheelers Bay"=>104,
+   );
+  if( $vmap[$event["LOCATION"]] ) {
+    $event["LOCID"] = floor($vmap[$event["LOCATION"]] );
+    $s = $event["LOCID"];
+  }
+  else {
+    $s = 99;
+  }
+  $event["SORTCODE"]=sprintf( "%03d%s",  $s*10, $event["LOCATION"] );
+
   return $event;
 }
 
@@ -358,21 +379,11 @@ jQuery(document).ready(function() {
 }
 
 
-function chrisvf_cmp_venue($a,$b) {
-  global $vf_venues;
-  $va = $vf_venues[$a];
-  $vb = $vf_venues[$b];
-  if( @$va->field_venue_sort_code['und'][0]['value'] > @$vb->field_venue_sort_code['und'][0]['value'] ) { return -1; }
-  if( @$va->field_venue_sort_code['und'][0]['value'] < @$vb->field_venue_sort_code['und'][0]['value'] ) { return 1; }
-  if( $va->name > $vb->name ) { return 1; }
-  if( $va->name < $vb->name ) { return -1; }
-  return 0;
-}
 
 function chrisvf_serve_grid_day( $date ) {
   // load venues
-  global $vf_venues;
-  $vf_venues = chrisvf_load_venues();
+#j.  global $vf_venues;
+  #$vf_venues = chrisvf_load_venues();
   $day_start = "08:00:00 BST";
   $day_end = "02:00:00 BST";
 
@@ -420,12 +431,13 @@ function chrisvf_serve_grid_day( $date ) {
     $timemap[ $times[$i] ] = $i;
   }
 
-
+  $venues = array();
   // build up grid  
   $grid = array(); # venue=>list of columns for venu
   foreach( $events as $event ) {
     $ev_time =chrisvf_event_time($event);
     $venue_id = $event["LOCATION"];
+    $venues[$event["SORTCODE"]] = $venue_id;
 
 
       if( $ev_time['start'] >= $end_t ) { continue; } // starts after our window
@@ -476,14 +488,12 @@ function chrisvf_serve_grid_day( $date ) {
       $grid[$venue_id][$column_id][$start_i]["est"] = $ev_time['est'];
       $grid[$venue_id][$column_id][$start_i]["code"] = preg_replace( '/@.*/', '',  $event["UID"] );
   } // end of events loop
-#print "<pre>"; print_r( $grid ); print "</pre>";
 
   // venue ids. Could/should sort this later
-  $venue_ids = array_keys( $grid );
-  usort( $venue_ids, "chrisvf_cmp_venue" );
+  ksort( $venues );
 
   // see if we can expand any events to fill the space available.
-  foreach( $venue_ids as $venue_id ) {
+  foreach( $venues as $venue_id ) {
     $cols = $grid[$venue_id];
     // look at columns except the last one...
     for( $c1=0;$c1<sizeof($cols)-1;++$c1 ) {
@@ -518,7 +528,7 @@ function chrisvf_serve_grid_day( $date ) {
   // Venue headings
   $h[]= "<tr>";
   $h[]= "<th></th>";
-  foreach( $venue_ids as $venue_id ) {
+  foreach( $venues as $venue_id ) {
     $cols = $grid[$venue_id];
     $h[]= "<th class='vf_grid_venue' colspan='".sizeof( $cols )."'>";
     $h[]= $venue_id;
@@ -546,7 +556,7 @@ function chrisvf_serve_grid_day( $date ) {
     $h[]= "<th class='vf_grid_timeslot'>".date("H:i",$slot["start"])."</th>";
     #$h[]= "<th class='vf_grid_timeslot'>".date("d H:i",$slot["end"])."</th>";
     $odd_col = true;
-    foreach( $venue_ids as $venue_id ) {
+    foreach( $venues as $venue_id ) {
 
       for( $col_id=0; $col_id<sizeof($grid[$venue_id]); ++$col_id ) {
         $col = $grid[$venue_id][$col_id];
@@ -560,7 +570,7 @@ function chrisvf_serve_grid_day( $date ) {
         if( $col_id==sizeof($grid[$venue_id])-1 ) {
           $classes .= " vf_grid_col_vlast"; // last column for this venue
         }
-        $classes.= " vf_grid_venue_".preg_replace( "/[^a-z]/i", "", $vf_venues[$venue_id]->name );
+        #$classes.= " vf_grid_venue_".preg_replace( "/[^a-z]/i", "", $vf_venues[$venue_id]->name );
 
         if( @$cell['event'] ) {
           $url= $cell["event"]["URL"];
@@ -637,7 +647,7 @@ function chrisvf_serve_grid_day( $date ) {
   // Venue headings
   $h[]= "<tr>";
   $h[]= "<th></th>";
-  foreach( $venue_ids as $venue_id ) {
+  foreach( $venues as $venue_id ) {
     $cols = $grid[$venue_id];
     $h[]= "<th class='vf_grid_venue' colspan='".sizeof( $cols )."'>";
     $h[]= $venue_id;
@@ -880,11 +890,53 @@ function chrisvf_render_itinerary( $atts = [], $content = null) {
   $h []= "class='vf_itinerary_none'>No items in your itinerary. Browse the website and add some.</p>";
   if( count($itinerary['codes']) ) {
     $h []= chrisvf_render_itinerary_table( $itinerary );
+  
     $link = "http://vfringe.ventnorexchange.co.uk/saved-itinerary?ids=".urlencode( $_COOKIE["itinerary"] );
     $msg = "My #VFringe17 plan: $link";
     $h []= "<div>";
     $h []= "<a href='http://twitter.com/intent/tweet?text=".urlencode($msg)."' class='vf_itinerary_button'>Tweet my Itinerary</a>";
     $h []= "<a href='https://www.facebook.com/sharer/sharer.php?u=".urlencode($link)."' class='vf_itinerary_button'>Post to Facebook</a>";
+    $body = "\r\nYour Ventnor Fringe 2017 Itinerary\r\n";
+    $body = "\r\n";
+    
+    foreach( $itinerary['codes'] as $code ) {
+      $event = @$itinerary['events'][$code];
+      if( !$event ) {
+        $time_t = 0;
+      } else {
+        $time_t = strtotime($event["DTSTART"]);
+      }
+      if( @!is_array( $list[$time_t] ) ) { $list[$time_t][]=$code; }
+    }  
+    ksort( $list );
+    global $vf_js_id;
+    $lastday = "NULL";
+    foreach( $list as $start_time=>$codes ) {
+      foreach( $codes as $code ) {
+        $event = @$itinerary['events'][$code];
+        if( !$event ) { continue; }
+        $thisday = date( "l jS", $start_time );
+        if( $thisday != $lastday ) {
+          $body.= "\r\n$thisday\r\n";
+          $lastday=$thisday;
+        }
+        $body.= "".date("H:i",$start_time);
+        if( @$event["DTEND"] ) {
+          $end_t = strtotime($event["DTEND"]);
+          $body.= "-".  date("H:i",$end_t);
+        }
+        $body .= ' : '.$event["SUMMARY"];
+        $body .= ' @ '.$event["LOCATION"];
+
+        if( !empty( $event["URL"] ) ) {
+          $body .= ' - '. $event["URL"];
+        }
+        $body .="\r\n";
+      }
+    } 
+
+    #$body = "\r\n\r\nView online at: ".$link;
+    $h []= "<a href='mailto:?subject=Your%20Ventnor%20Fringe%20Itinerary&body=".preg_replace('/\+/','%20',urlencode($body))."' class='vf_itinerary_button'>Send by Email</a>";
     $h []= "</div>";
   }
   return join( "", $h) ;
