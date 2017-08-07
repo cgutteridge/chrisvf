@@ -1109,7 +1109,7 @@ array("GEO"=>array(50.59439,-1.1991 ),"NAME"=>"Wheelers Bay", "VENUES"=>array( "
   wp_enqueue_script( 'chrisvf-leaflet-label' );
   wp_enqueue_style( 'chrisvf-leaflet' );
   wp_enqueue_style( 'chrisvf-leaflet-label' );
-print "<PRE>".htmlspecialchars(print_r( $places,1 ))."</pre>";
+#print "<PRE>".htmlspecialchars(print_r( $places,1 ))."</pre>";
   global $mapid;
   $id = "map".(++$mapid); // make sure the js uses a unique ID in case multiple maps on a page
   $h = "";
