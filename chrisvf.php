@@ -217,8 +217,9 @@ function chrisvf_munge_ical_event( $event ) {
 "Trinity Theatre (Trinity Church Hall)"=>11.2,
 "Ventnor Arts Club"=>12,
 "Ventnor Winter Gardens"=>13.1,
-"The Long Room"=>13.2,
+"Ventnor Winter Gardens: The Long Room"=>13.2,
 "Ventnor Winter Gardens: Balmoral Room"=>13.3,
+"Secret Venue"=>99,
 #"The Tea House"=>101,
 #"Ventnor Town"=>102,
 #"Secret Venue"=>103,
@@ -1099,6 +1100,9 @@ var bounds = L.latLngBounds([]);
     $icon_anchor = '16,37';
     if( $place['number'] ) { 
       $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n='.$place['number'];
+    }
+    if( $place['number']==99 ) { 
+    $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
     }
     if( $place['number']==-1 ) { 
       $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
