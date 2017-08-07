@@ -1119,7 +1119,7 @@ var bounds = L.latLngBounds([]);
    //popupAnchor: [0, -40]
 
     $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["name"])."</p>";
-    $popup.= print_r( $place ,1);
+    $popup.= print_r( $place ,true);
     if( @$venueEvents[$place["loccode"]] ) {
       ksort( $venueEvents[$place["loccode"]]);
       foreach( $venueEvents[$place["loccode"]] as $day ) {
