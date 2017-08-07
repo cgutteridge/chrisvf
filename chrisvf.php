@@ -92,6 +92,7 @@ function chrisvf_get_info() {
       $event["LOCATION"] = "Parkside";
       $event["SORTCODE"]= "030Parkside";
       $event["LOCID"] = 3;
+      $event["MAINLOC"] = true;
       if( !preg_match( '/£/', $event["SUMMARY"] ) ) { $event["CATEGORIES"] = "Free Fringe"; }
       $chrisvf_cache["events"][$event["UID"]] = $event;
     }
