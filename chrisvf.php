@@ -99,7 +99,7 @@ function chrisvf_get_info() {
     $chrisvf_cache["venues"] = array();
     foreach( $chrisvf_cache["events"] as $event ) {
       if( empty( $event["LOCATION"] ) ){ continue; }
-      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"], "loccode"=>$event["LOCCODE"], "sortcode"=>$event["SORTCODE"], "number"=>$event["LOCID"] );
+      $loc = array( "name"=>$event["LOCATION"], "geo"=>@$event["GEO"], "loccode"=>$event["LOCCODE"], "sortcode"=>$event["SORTCODE"], "number"=>$event["LOCID"],"main"=>$event["MAINLOC"] );
       $chrisvf_cache["venues"][ $event["LOCATION"] ]  = $loc;
     }
 
@@ -229,6 +229,8 @@ function chrisvf_munge_ical_event( $event ) {
     $event["LOCID"] = floor($vmap[$event["LOCATION"]] );
     $s = $event["LOCID"];
     $event["LOCCODE"]=sprintf( "%03d",  floor($s));
+    $event["MAINLOC"] = ( $s==floor($s));
+    if( $s==0.1 ) { $event["MAINLOC"]=true; }
   }
   else {
     $s = 99;
@@ -1037,7 +1039,10 @@ function chrisvf_render_itinerary_table( $itinerary, $active = true ) {
 function chrisvf_render_map() {
   $pois= chrisvf_load_pois();
   $info = chrisvf_get_info();
-  $places = array_merge( $info['venues'], $pois);
+  $places = array_merge( $pois );
+  foreach( $info['venues'] as $venue ) {
+    if( $venue["main"] ) { $places[$venue["loccode"]] = $venue; }
+  }
 
   $venueEvents = array();
   $nowFree = array();
@@ -1110,7 +1115,7 @@ var bounds = L.latLngBounds([]);
     if( $place['number']==99 ) { 
       $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
     }
-    if( $place['loccode']==="000" ) { 
+    if( $place['loccode']==="001" ) { 
       $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
       $icon_size = '40,47';
       $icon_anchor = '20,23';
