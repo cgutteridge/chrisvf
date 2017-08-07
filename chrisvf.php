@@ -1134,13 +1134,18 @@ var bounds = L.latLngBounds([]);
   var icon;
   var marker;
   L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution: 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>', maxZoom: 20 }).addTo(map);
+
+
+  var imageUrl = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/mapship.png';
+  var imageBounds = [ [ 50.59345,-1.19678 ] , [ 50.59166,-1.1939 ]  ];
+  L.imageOverlay(imageUrl, imageBounds).addTo(map);
  }('$id'));
 
 ";
-  #var imageUrl = 'http://ventnorexchange.co.uk/sites/default/files/fringedatesarcpink.png';
-  #var imageBounds = [ [50.59150, -1.20201], [50.58901, -1.21435] ];
-  #L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
+#  var imageUrl = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/mapfish.png';
+#  var imageBounds = [[ 50.59295,-1.20932 ] ,[ 50.59242,-1.20795 ] ];
+#  L.imageOverlay(imageUrl, imageBounds).addTo(map);
   foreach( $places as $place ) {
     $lat_long = join( ",",$place["GEO"]);
     if( empty($lat_long) ) { continue; }
