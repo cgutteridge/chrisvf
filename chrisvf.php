@@ -1147,14 +1147,14 @@ var bounds = L.latLngBounds([]);
 
    //popupAnchor: [0, -40]
 
-    $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["name"])."</p>";
+    $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["NAME"])."</p>";
     if( @$_GET['debug'] ) {
       $popup.= "<pre>".htmlspecialchars(print_r($place,true))."</pre>";
     }
     if( @$place["events"] ) {
       ksort( $place["events"] );
       foreach( $place["events"] as $day ) {
-        $popup .= "<h3 style='color: #000;font-size:120%; margin-bottom:3px'>".$day["label"]."</h3>";
+        $popup .= "<h3 style='color: #000;font-size:120%; margin-bottom:3px; margin-top: 0.5em;'>".$day["label"]."</h3>";
         ksort( $day['times'] );
         foreach( $day['times'] as $time=>$events ) {
           foreach( $events as $event ) {
