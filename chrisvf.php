@@ -1077,7 +1077,7 @@ function chrisvf_render_map() {
   $id = "map".(++$mapid); // make sure the js uses a unique ID in case multiple maps on a page
   $h = "";
   if( @$_GET['debug'] ) {
-    $h .= "<pre>".htmlspecialchars(print_r($venueEvents,true))."</pre>";
+    $h .= "<pre>".htmlspecialchars(print_r($places,true))."</pre>";
   }
   $h.= "<div id='$id' style='height: 600px; width: 100%;'>HELLO</div>\n";
   $h.= "<script>\n";
