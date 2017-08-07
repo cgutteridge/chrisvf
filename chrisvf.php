@@ -1048,7 +1048,7 @@ function chrisvf_render_map() {
       if( $end_t < time() ) { continue; } # skip done events
 
       $date = date( "Y-m-d", $time_t );
-      $dateLabel = date( "l jS F", $time_t );
+      $dateLabel = date( "l jS", $time_t );
       $time = date( "H:i", $time_t );
       $tid = $event["LOCCODE"];
 
