@@ -1085,10 +1085,10 @@ var bounds = L.latLngBounds([]);
   L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution: 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>', maxZoom: 20 }).addTo(map);
  }('$id'));
 
-  var imageUrl = 'http://ventnorexchange.co.uk/sites/default/files/fringedatesarcpink.png';
-  var imageBounds = [ [50.59150, -1.20201], [50.58901, -1.21435] ];
-  L.imageOverlay(imageUrl, imageBounds).addTo(map);
 ";
+  #var imageUrl = 'http://ventnorexchange.co.uk/sites/default/files/fringedatesarcpink.png';
+  #var imageBounds = [ [50.59150, -1.20201], [50.58901, -1.21435] ];
+  #L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
   foreach( $places as $place ) {
     $lat_long = $place["geo"];
@@ -1097,14 +1097,22 @@ var bounds = L.latLngBounds([]);
     $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=X';
     $icon_size = '32,37';
     $icon_anchor = '16,37';
+    if( $place['number'] ) { 
+      $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n='.$place['number'];
+    }
+    if( $place['number']===0 ) { 
+      $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
+      $icon_size = '40,47';
+      $icon_anchor = '20,23';
+    }
 
    //popupAnchor: [0, -40]
 
-    $popup = "<p style='color: #000;font-size:80%'>".htmlspecialchars($place["name"])."</h2>";
+    $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["name"])."</h2>";
     if( @$venueEvents[$place["sortcode"]] ) {
       ksort( $venueEvents[$place["sortcode"]]);
       foreach( $venueEvents[$place["sortcode"]] as $day ) {
-        $popup .= "<h3 style='color: #000;font-size:80%; margin-bottom:3px'>".$day["label"]."</h3>";
+        $popup .= "<h3 style='color: #000;font-size:120%; margin-bottom:3px'>".$day["label"]."</h3>";
         ksort( $day['times'] );
         foreach( $day['times'] as $time=>$events ) {
           foreach( $events as $event ) {
@@ -1113,7 +1121,7 @@ var bounds = L.latLngBounds([]);
             
             $url= $event["URL"];
             $name= $event["SUMMARY"];
-            $popup .= "<div>$time - ";
+            $popup .= "<div style='color:#000;'>$time - ";
             if( !empty($url) ) { $popup .= "<a href='$url'>".htmlspecialchars($name)."</a>"; }
             else { $popup .= htmlspecialchars($name);
 
