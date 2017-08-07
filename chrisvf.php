@@ -202,7 +202,7 @@ function chrisvf_munge_ical_event( $event ) {
 
   $vmap=array( 
 
-"Ventnor Exchange"=>0,
+"Ventnor Exchange"=>0.1,
 "35 Madeira Road"=>1,
 "Bonchurch Old Church"=>2,
 "Parkside"=>3,
@@ -1108,9 +1108,9 @@ var bounds = L.latLngBounds([]);
       $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n='.$place['number'];
     }
     if( $place['number']==99 ) { 
-    $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
+      $icon_url = 'http://data.southampton.ac.uk/images/numbericon.png?n=?';
     }
-    if( $place['number']===0 ) { 
+    if( $place['number']==0 ) { 
       $icon_url = 'http://vfringe.ventnorexchange.co.uk/wp-content/uploads/sites/2/2017/08/ExchangeIcon.png';
       $icon_size = '40,47';
       $icon_anchor = '20,23';
