@@ -1056,7 +1056,7 @@ array("GEO"=>array(50.59298,-1.2057),"NAME"=>"The Plaza and Observatory Bar", "I
 array("GEO"=>array(50.5954475,-1.2054837),"NAME"=>"Ventnor Arts Club", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=12", "VENUES"=>array(
 "120Ventnor Arts Club",
  )),
-array("GEO"=>array(50.5982092,-1.1956885),"NAME"=>"Trinity Church and Theatre", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=11", "VENUES"=>array(
+array("GEO"=>array(50.59777,-1.19658),"NAME"=>"Trinity Church and Theatre", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=11", "VENUES"=>array(
 "110Holy Trinity Church", "110Trinity Theatre (Trinity Church Hall)", )),
 array("GEO"=>array(50.5980726,-1.2085883),"NAME"=>"The Warehouse", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=9", "VENUES"=>array(
 "090The Warehouse", )),
