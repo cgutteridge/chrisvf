@@ -1064,11 +1064,11 @@ array("GEO"=>array(50.5980726,-1.2085883),"NAME"=>"The Warehouse", "ICON"=>"http
 "090The Warehouse", )),
 array("GEO"=>array(50.5939694,-1.204638),"NAME"=>"Ventnor Winter Gardens", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=13", "VENUES"=>array(
 "130Ventnor Winter Gardens", "130Ventnor Winter Gardens: The Long Room", "130Ventnor Winter Gardens: Balmoral Room"  )),
-array("GEO"=>array(50.59215,-1.20824),"NAME"=>"Secret Venue", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=?", "VENUES"=>array(
+array("GEO"=>array(50.59215,-1.20824),"NAME"=>"Secret Venue", "DESC"=>"Obviously, this event isn't really in the sea. The real location is such a secret that they won't tell me!", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=?", "VENUES"=>array(
 "990Secret Venue", )),
 array("GEO"=>array(50.59396,-1.20265),"NAME"=>"The Green Room: Ventnor Town Council", "VENUES"=>array( "990The Green Room: Ventnor Town Council"), "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=G" ),
 array("GEO"=>array(50.5953723,-1.2043726),"NAME"=>"The Tea House", "VENUES"=>array( "990The Tea House"), "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=T" ),
-array("GEO"=>array(50.59591,-1.20311),"NAME"=>"Ventnor Town", "VENUES"=>array( "990Ventnor Town"),  "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=V"),
+array("GEO"=>array(50.59591,-1.20311),"NAME"=>"Ventnor Town", "DESC"=>"These events happen throughout the town. This pin is just the middle of town, not the location!", "VENUES"=>array( "990Ventnor Town"),  "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=V"),
 array("GEO"=>array(50.59439,-1.1991 ),"NAME"=>"Wheelers Bay", "VENUES"=>array( "990Wheelers Bay"),  "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=W"),
 
 array( "NAME"=>"Cashpoint", "GEO"=>array( 50.59527,-1.20146 ), "ICON"=>"http://data.southampton.ac.uk/map-icons/Offices/atm.png" ),
@@ -1165,6 +1165,9 @@ var bounds = L.latLngBounds([]);
    //popupAnchor: [0, -40]
 
     $popup = "<p style='color: #000;font-size:130%'>".htmlspecialchars($place["NAME"])."</p>";
+    if( !empty( $place["DESC"] ) ) {
+      $popup.= "<p style='color: #000;'>".htmlspecialchars($place["DESC"])."</p>";
+    }
     if( @$_GET['debug'] ) {
       $popup.= "<pre>".htmlspecialchars(print_r($place,true))."</pre>";
     }
