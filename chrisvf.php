@@ -1128,7 +1128,7 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
   if( @$_GET['debug'] ) {
     $h .= "<pre>".htmlspecialchars(print_r($places,true))."</pre>";
   }
-  $h.= "<div id='$id' style='height: 600px; width: 100%;'>HELLO</div>\n";
+  $h.= "<div id='$id' style='height: 600px; width: 100%;'></div>\n";
   $h.= "<script>\n";
   $h.="
 jQuery( document ).ready( function() {
@@ -1189,18 +1189,18 @@ var bounds = L.latLngBounds([]);
         }
       }
     }
-    $nowText = "";
-    if( @$nowFree[ $place["loccode"] ] ) {
-      $nowText .= join( "", $place["nowFree"] );
-    }
-    if( @$soon[ $place["loccode"] ] ) {
-      $nowText .= join( "", $place["soon"] );
-    }
-    if( $nowText != "" ) {
-      $nowText = "'$nowText'";
-    } else {
-      $nowText = 'false';
-    }
+  }
+  $nowText = "";
+  if( @$place["nowFree"] ) {
+    $nowText .= join( "", $place["nowFree"] );
+  }
+  if( @$place["soon"] ) {
+    $nowText .= join( "", $place["soon"] );
+  }
+  if( $nowText != "" ) {
+    $nowText = "'$nowText'";
+  } else {
+    $nowText = 'false';
   }
   $h.="
   (function(lat_long,icon_url,icon_size,icon_anchor, name, popupText,nowText){
