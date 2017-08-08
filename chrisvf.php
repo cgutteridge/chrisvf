@@ -602,7 +602,7 @@ function chrisvf_serve_grid_day( $date ) {
           $id = "g".preg_replace( '/-/','_',$cell['event']['UID'] );
           $data =
           $h[]= "<td id='$id' data-code='".$cell['event']['UID']."' class='$classes' colspan='".$cell['width']."' rowspan='$height' ".(empty($url)?"":"data-url='".$url."'").">";
-          if( $t1["start"]<=time() && $t1["end"]>=time() ) {
+          if( $t1["start"]<=chrisvf_now() && $t1["end"]>=chrisvf_now() ) {
             $h[]="<div class='vf_grid_now'>NOW</div>";
           }
           $h[]= "<div class='vf_grid_event_middle'>";
@@ -811,7 +811,7 @@ function chrisvf_now_and_next() {
       $time_t = strtotime( $start );
       $end = $date["value2"]." ".$date["timezone_db"];
       $end_t = strtotime( $end );
-      if( $end_t < time() ) { continue; } # skip done events
+      if( $end_t < chrisvf_now() ) { continue; } # skip done events
 
       $tid = $event->field_venue['und'][0]['tid'];
 
@@ -823,11 +823,11 @@ function chrisvf_now_and_next() {
       }
 
       $venue = $venues[$event->field_venue['und'][0]['tid']];
-      if( $time_t>time() && $time_t<time()+90*60 ) {
+      if( $time_t>chrisvf_now() && $time_t<chrisvf_now()+90*60 ) {
         #starts in the next 90 minutes
         $list[]= "<div>".date( "ga",$time_t)." - <strong><a href='".url('node/'. $event->nid)."'>". htmlspecialchars( $event->title, ENT_QUOTES ) ."</strong></a> - <a href='".url('taxonomy/term/'. $venue->tid)."'>".$venue->name."</a></a></div>";
       }
-      if( $time_t<time() && $end_t>time()+10*60 && $free ) {  # free,
+      if( $time_t<chrisvf_now() && $end_t>chrisvf_now()+10*60 && $free ) {  # free,
         #starts in the next 90 minutes
         $list[]= "<div>Now - <strong><a href='".url('node/'. $event->nid)."'>". htmlspecialchars( $event->title, ENT_QUOTES )."</strong></a> - <a href='".url('taxonomy/term/'. $venue->tid)."'>".$venue->name."</a></div>" ;
       }
@@ -1089,9 +1089,9 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
   }
 #print_r( $venueToPOI );exit;
   foreach( $info['events'] as $event ) {
-      $time_t = strtotime($event["DTSTART"]." BST");
-      $end_t = strtotime($event["DTEND"]." BST");
-      if( $end_t < time() ) { continue; } # skip done events
+      $time_t = strtotime($event["DTSTART"];
+      $end_t = strtotime($event["DTEND"]
+      if( $end_t < chrisvf_now() ) { continue; } # skip done events
 
       $date = date( "Y-m-d", $time_t );
       $dateLabel = date( "l jS", $time_t );
@@ -1107,11 +1107,11 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
       @$places[$tid]["events"][$date]['label'] = $dateLabel;
       @$places[$tid]["events"][$date]['times'][$time][]=$event;
 
-      if( $time_t>time() && $time_t<time()+90*60 ) {
+      if( $time_t>chrisvf_now() && $time_t<chrisvf_now()+90*60 ) {
         #starts in the next 90 minutes
         $places[$tid]["soon"][]= "<div><strong>".date( "ga",$time_t)." - ". htmlspecialchars( $event['SUMMARY'], ENT_QUOTES ) ."</strong></div>";
       }
-      if( $time_t<time() && $end_t>time()+10*60 && $free ) {  # free,
+      if( $time_t<chrisvf_now() && $end_t>chrisvf_now()+10*60 && $free ) {  # free,
         #starts in the next 90 minutes
         $places[$tid]["nowFree"][]= "<div><strong>Now - ". htmlspecialchars(  $event['SUMMARY'],  ENT_QUOTES )."</strong></div>" ;
       }
@@ -1234,3 +1234,6 @@ var bounds = L.latLngBounds([]);
 
 // eat a sea horse
 
+function chrisvf_now() {
+  return time()+3600; //ugh live website is in UTC
+}
