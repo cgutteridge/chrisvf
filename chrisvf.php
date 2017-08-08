@@ -1051,7 +1051,7 @@ array("GEO"=>array(50.59286,-1.21461),"NAME"=>"Parkside", "ICON"=>"http://data.s
 "030Parkside", )),
 array("GEO"=>array(50.5942474,-1.2047129),"NAME"=>"Pier Street Playhouse", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=4", "VENUES"=>array(
 "040Pier St. Playhouse", )),
-array("GEO"=>array(50.59461,-1.20698),"NAME"=>"St Cathrine's Churche", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=5", "VENUES"=>array(
+array("GEO"=>array(50.59461,-1.20698),"NAME"=>"St Catherine's Church", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=5", "VENUES"=>array(
 "050St. Catherines Church", )),
 array("GEO"=>array(50.59298,-1.2057),"NAME"=>"The Plaza and Observatory Bar", "ICON"=>"http://data.southampton.ac.uk/images/numbericon.png?n=8", "VENUES"=>array(
 "080The Observatory Bar", "080The Plaza", )),
