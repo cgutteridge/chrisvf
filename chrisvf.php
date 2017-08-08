@@ -1089,8 +1089,8 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
   }
 #print_r( $venueToPOI );exit;
   foreach( $info['events'] as $event ) {
-      $time_t = strtotime($event["DTSTART"]);
-      $end_t = strtotime($event["DTEND"]);
+      $time_t = strtotime($event["DTSTART"]." BST");
+      $end_t = strtotime($event["DTEND"]." BST");
       if( $end_t < time() ) { continue; } # skip done events
 
       $date = date( "Y-m-d", $time_t );
@@ -1186,7 +1186,6 @@ var bounds = L.latLngBounds([]);
             $popup .= "<div style='color:#000;'>$time - ";
             if( !empty($url) ) { $popup .= "<a href='$url'>".$name."</a>"; }
             else { $popup .= $name;
-
             if( $free ) { $popup .= " - Free Fringe"; }
           }
         }
