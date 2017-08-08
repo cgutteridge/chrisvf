@@ -151,6 +151,7 @@ function chrisvf_wp_events() {
 		if ( 'DATE' === $type ){
 			$item[ "DTSTART"] = $tzoned->start;
 			$item[ "DTEND"] = $tzoned->end;
+			$item[ "ALLDAY"] = true;
 		} else {
 			// Are we using the sitewide timezone or the local event timezone?
 			$tz = Tribe__Events__Timezones::EVENT_TIMEZONE === Tribe__Events__Timezones::mode()
@@ -159,6 +160,7 @@ function chrisvf_wp_events() {
 	
 			$item[ 'DTSTART'] = $tzoned->start;
 			$item[ 'DTEND' ] = $tzoned->end;
+			$item[ "ALLDAY"] = false;
 		}
 	
 		$item[ 'UID' ]= $event_post->ID . '-' . $time->start ;
@@ -1095,6 +1097,9 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
       $dateLabel = date( "l jS", $time_t );
       $time = date( "H:i", $time_t );
       $tid = $venueToPOI[$event["SORTCODE"]];
+      if( $event["ALLDAY"] ) {
+        $time = "ALL DAY";
+      }
 
       $free = false;
       if( preg_match( '/Free Fringe/', $event["CATEGORIES"] ) ) { $free = true; }
