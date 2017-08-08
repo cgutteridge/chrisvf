@@ -1109,11 +1109,11 @@ array( "NAME"=>"Public Bogs", "GEO"=>array( 50.59244,-1.21552 ),"ICON"=>"http://
 
       if( $time_t>chrisvf_now() && $time_t<chrisvf_now()+90*60 ) {
         #starts in the next 90 minutes
-        $places[$tid]["soon"][]= "<div><strong>".date( "ga",$time_t)." - ". $event['SUMMARY'] ."</strong></div>";
+        $places[$tid]["soon"][]= "<div><strong>".date( "ga",$time_t)." - ". preg_replace('/\\\'/', '&squot;', $event['SUMMARY']) ."</strong></div>";
       }
       if( $time_t<chrisvf_now() && $end_t>chrisvf_now()+10*60 && $free ) {  # free,
         #starts in the next 90 minutes
-        $places[$tid]["nowFree"][]= "<div><strong>Now - ". $event['SUMMARY']."</strong></div>" ;
+        $places[$tid]["nowFree"][]= "<div><strong>Now - ". preg_replace('/\\\'/','&squot;',$event['SUMMARY'])."</strong></div>" ;
       }
   }
 
