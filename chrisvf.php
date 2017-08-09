@@ -681,6 +681,7 @@ function chrisvf_render_random( $atts = [], $content = null) {
   $h.= "<div style='height:500px; padding: 1em; text-align:centre'>";
   foreach( $events as $event ) {
    $time_t = strtotime($event["DTSTART"]);
+   if( $time_t < chrisvf_now() ) { continue; } # skip done events
    ++$r;
    $h .="<div class='rcell' id='r$r' style='".($r==1?"":"display:none;")." text-align:center;'>";
    $h .= "<div style='font-size:150%'>";
